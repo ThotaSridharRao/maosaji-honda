@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maosaji Honda - Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            colors: {
+                primary: '#e31837', /* Honda's primary red color */
+                secondary: '#000000' /* Dark grey for text */
+            },
+            borderRadius: {
+                'none': '0px',
+                'sm': '4px',
+                DEFAULT: '8px',
+                'md': '12px',
+                'lg': '16px',
+                'xl': '20px',
+                '2xl': '24px',
+                '3xl': '32px',
+                'full': '9999px',
+                'button': '8px' /* Custom border-radius for buttons */
+            }
+        }
+    }
+};
+</script>
+<style>
+/* Reset Remixicon content to allow individual icon display */
+:where([class^="ri-"])::before { content: initial; } /* Remove default content to allow specific icon classes to work */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    scroll-behavior: smooth;
+}
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f0f9ff 0%, #e1f5fe 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+.loader {
+    position: relative;
+    width: 120px;
+    height: 120px;
+}
+.loader-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid transparent;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+.loader-circle:nth-child(2) {
+    width: 80%;
+    height: 80%;
+    top: 10%;
+    left: 10%;
+    border-top-color: #10b981;
+    animation-duration: 1.3s;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.logo-pulse {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.fade-in.appear {
+    opacity: 1;
+    transform: translateY(0);
+}
+.service-vehicle-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.service-vehicle-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+.status-pending { background-color: #fef3c7; color: #d97706; } /* yellow-100, yellow-700 */
+.status-in-progress { background-color: #bfdbfe; color: #1d4ed8; } /* blue-200, blue-800 */
+.status-completed { background-color: #d1fae5; color: #065f46; } /* green-100, green-800 */
+.status-ready-for-pickup { background-color: #bae6fd; color: #0369a1; } /* lightblue-100, lightblue-800 */
+.status-cancelled { background-color: #fee2e2; color: #b91c1c; } /* red-100, red-700 */
+
+/* Styles for custom form elements (if needed, though not directly used in this version) */
+.custom-checkbox {
+    position: relative;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.custom-checkbox.checked {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+.custom-checkbox.checked::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 6px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+.custom-switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+    cursor: pointer;
+}
+.switch-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e5e7eb;
+    border-radius: 24px;
+    transition: background-color 0.3s ease;
+}
+.switch-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.switch-active .switch-track {
+    background-color: #3b82f6;
+}
+.switch-active .switch-thumb {
+    transform: translateX(24px);
+}
+</style>
+</head>
+<body>
+<!-- Loading Screen -->
+<div class="loading-screen" id="loading-screen">
+    <div class="flex flex-col items-center">
+        <div class="logo-pulse text-4xl font-['Pacifico'] text-primary mb-4">Maosaji Honda</div>
+        <div class="loader">
+            <div class="loader-circle"></div>
+            <div class="loader-circle"></div>
+        </div>
+        <p class="mt-4 text-gray-600">Loading admin dashboard...</p>
+    </div>
+</div>
+
+<!-- Navigation (Header) -->
+<nav class="bg-white shadow-md fixed w-full z-50 transition-all duration-300" id="navbar">
+    <div class="container mx-auto px-4 py-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <img src="https://static.readdy.ai/image/37ac7cf2068439d6c30c12e5ad957f85/cf039908287dcf84123e6dde02bea2bc.png" alt="Honda Logo" class="h-8">
+                <a href="#" class="text-2xl font-bold text-primary">Maosaji Honda Admin</a>
+            </div>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#vehicles-for-servicing" class="text-gray-700 hover:text-primary transition-colors duration-300">Manage Services</a>
+                <a href="#add-service-entry" class="text-gray-700 hover:text-primary transition-colors duration-300">Add Service Entry</a>
+                <a href="#recent-activity" class="text-gray-700 hover:text-primary transition-colors duration-300">Recent Activity</a>
+                <button class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log Out</button>
+            </div>
+            <div class="md:hidden flex items-center">
+                <button id="mobile-menu-button" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-primary">
+                    <i class="ri-menu-line ri-lg"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="md:hidden hidden mt-4 pb-2">
+            <div class="flex flex-col space-y-3">
+                <a href="#vehicles-for-servicing" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Manage Services</a>
+                <a href="#add-service-entry" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Add Service Entry</a>
+                <a href="#recent-activity" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Recent Activity</a>
+                <button class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log Out</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Admin Dashboard Main Content -->
+<main class="pt-24 pb-12 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        <!-- Welcome Section -->
+        <section class="mb-12 fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Welcome, Worker!</h1>
+            <p class="text-lg text-gray-600">Manage service requests and update vehicle statuses.</p>
+        </section>
+
+        <!-- Vehicles for Servicing Section -->
+        <section id="vehicles-for-servicing" class="py-12 bg-white rounded-lg shadow-md mb-12 fade-in">
+            <div class="px-8 py-6 border-b border-gray-200 flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Vehicles for Servicing</h2>
+                <button id="scroll-to-add-vehicle" class="px-4 py-2 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all flex items-center">
+                    <i class="ri-add-line mr-2"></i> Add New Entry
+                </button>
+            </div>
+            <div id="service-vehicles-list" class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Vehicle cards will be dynamically loaded here -->
+                <!-- Example Vehicle Card with Status and Contact -->
+                <div class="service-vehicle-card bg-gray-50 p-6 rounded-lg shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="ri-motorcycle-line ri-xl text-primary"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-800">Honda CB350RS</h3>
+                        </div>
+                        <ul class="text-gray-600 space-y-2 text-sm mb-4">
+                            <li><span class="font-medium">License Plate:</span> DL10C3456</li>
+                            <li><span class="font-medium">Customer:</span> Alice Smith</li>
+                            <li><span class="font-medium">Phone:</span> <a href="tel:+919876543210" class="text-blue-600 hover:underline">+91 98765 43210</a></li>
+                        </ul>
+                        <div class="mb-4">
+                            <span class="text-sm font-medium">Status:</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase status-in-progress" data-current-status="in-progress">In Progress</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label for="status-cbr" class="text-sm text-gray-600">Update Status:</label>
+                            <select id="status-cbr" class="status-selector flex-grow px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                                <option value="pending">Pending</option>
+                                <option value="in-progress" selected>In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="ready-for-pickup">Ready for Pickup</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                            <button data-vehicle-id="cbr350rs" class="update-status-btn px-3 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors">
+                                Update
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Another Example Vehicle Card -->
+                <div class="service-vehicle-card bg-gray-50 p-6 rounded-lg shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                                <i class="ri-motorcycle-line ri-xl text-primary"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-800">Honda Dio</h3>
+                        </div>
+                        <ul class="text-gray-600 space-y-2 text-sm mb-4">
+                            <li><span class="font-medium">License Plate:</span> DL05A9876</li>
+                            <li><span class="font-medium">Customer:</span> Bob Johnson</li>
+                            <li><span class="font-medium">Phone:</span> <a href="tel:+917890123456" class="text-blue-600 hover:underline">+91 78901 23456</a></li>
+                        </ul>
+                        <div class="mb-4">
+                            <span class="text-sm font-medium">Status:</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase status-pending" data-current-status="pending">Pending</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <label for="status-dio" class="text-sm text-gray-600">Update Status:</label>
+                            <select id="status-dio" class="status-selector flex-grow px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                                <option value="pending" selected>Pending</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="completed">Completed</option>
+                                <option value="ready-for-pickup">Ready for Pickup</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                            <button data-vehicle-id="dio" class="update-status-btn px-3 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors">
+                                Update
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Message for no vehicles in service -->
+            <div id="no-service-vehicles-message" class="p-8 text-center text-gray-500 hidden">
+                <i class="ri-check-double-line text-6xl mb-4"></i>
+                <p class="text-xl font-medium mb-4">No vehicles currently in service!</p>
+                <p>Add a new service entry to get started.</p>
+            </div>
+        </section>
+
+        <!-- Add New Service Entry Section -->
+        <section id="add-service-entry" class="py-12 bg-white rounded-lg shadow-md fade-in">
+            <div class="px-8 py-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800">Add New Service Entry</h2>
+            </div>
+            <form id="add-service-form" class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="new-make" class="block text-gray-700 mb-2">Make</label>
+                        <input type="text" id="new-make" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Honda" required>
+                    </div>
+                    <div>
+                        <label for="new-model" class="block text-gray-700 mb-2">Model</label>
+                        <input type="text" id="new-model" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Activa 6G" required>
+                    </div>
+                    <div>
+                        <label for="new-license-plate" class="block text-gray-700 mb-2">License Plate</label>
+                        <input type="text" id="new-license-plate" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="UP65CD5678" required>
+                    </div>
+                    <div>
+                        <label for="customer-name" class="block text-gray-700 mb-2">Customer Name</label>
+                        <input type="text" id="customer-name" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="John Doe" required>
+                    </div>
+                    <div>
+                        <label for="customer-phone" class="block text-gray-700 mb-2">Customer Phone</label>
+                        <input type="tel" id="customer-phone" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="+919876543210" required>
+                    </div>
+                    <div>
+                        <label for="initial-status" class="block text-gray-700 mb-2">Initial Status</label>
+                        <select id="initial-status" class="w-full px-4 py-3 border border-gray-300 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-8">
+                            <option value="pending" selected>Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="ready-for-pickup">Ready for Pickup</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="ri-arrow-down-s-line text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="px-6 py-3 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all flex items-center justify-center">
+                    <i class="ri-save-line mr-2"></i> Add Service Entry
+                </button>
+            </form>
+        </section>
+
+        <!-- Recent Activity (Placeholder) -->
+        <section id="recent-activity" class="py-12 bg-white rounded-lg shadow-md mt-12 fade-in">
+            <div class="px-8 py-6 border-b border-gray-200">
+                <h2 class="text-2xl font-bold text-gray-800">Recent Activity</h2>
+            </div>
+            <div class="p-8 text-center text-gray-500">
+                <i class="ri-history-line text-6xl mb-4"></i>
+                <p class="text-xl font-medium mb-4">Activity Log Coming Soon!</p>
+                <p>This section will display recent updates and actions taken on service entries.</p>
+            </div>
+        </section>
+    </div>
+</main>
+
+<!-- Map Section (Copied from index.html) -->
+<section class="h-96 relative overflow-hidden">
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://public.readdy.ai/gen_page/map_placeholder_1280x720.png');"></div>
+    <div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
+            <h3 class="text-2xl font-semibold mb-4">Visit Our Location</h3>
+            <p class="text-gray-600 mb-6">We're conveniently located in the heart of Automotive City with easy access and ample parking.</p>
+            <button class="px-6 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">
+                <i class="ri-navigation-line mr-2"></i> Get Directions
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Footer (Copied from index.html) -->
+<footer class="bg-gray-800 text-white pt-16 pb-8">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            <!-- Company Info -->
+            <div>
+                <div class="flex items-center gap-2 mb-6">
+                    <img src="https://static.readdy.ai/image/37ac7cf2068439d6c30c12e5ad957f85/cf039908287dcf84123e6dde02bea2bc.png" alt="Honda Logo" class="h-8">
+                    <h3 class="text-xl font-bold text-primary">Maosaji Honda</h3>
+                </div>
+                <p class="text-gray-400 mb-6">Authorized Honda motorcycle service center providing professional maintenance to keep your bike performing at its best.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
+                        <i class="ri-facebook-fill"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
+                        <i class="ri-twitter-fill"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
+                        <i class="ri-instagram-line"></i>
+                    </a>
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
+                        <i class="ri-youtube-fill"></i>
+                    </a>
+                </div>
+            </div>
+            <!-- Quick Links -->
+            <div>
+                <h4 class="text-lg font-semibold mb-6">Quick Links</h4>
+                <ul class="space-y-3">
+                    <li><a href="#vehicles-for-servicing" class="text-gray-400 hover:text-white transition-colors duration-300">Manage Services</a></li>
+                    <li><a href="#add-service-entry" class="text-gray-400 hover:text-white transition-colors duration-300">Add Service Entry</a></li>
+                    <li><a href="#recent-activity" class="text-gray-400 hover:text-white transition-colors duration-300">Recent Activity</a></li>
+                </ul>
+            </div>
+            <!-- Services (Can link to specific dashboard sections or external service pages) -->
+            <div>
+                <h4 class="text-lg font-semibold mb-6">Our Services</h4>
+                <ul class="space-y-3">
+                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Oil Change</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Brake Service</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Diagnostics</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Battery Service</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Engine Repair</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">A/C Service</a></li>
+                </ul>
+            </div>
+            <!-- Newsletter -->
+            <div>
+                <h4 class="text-lg font-semibold mb-6">Newsletter</h4>
+                <p class="text-gray-400 mb-6">Subscribe to our newsletter for the latest service offers and automotive tips.</p>
+                <form class="mb-4">
+                    <div class="flex">
+                        <input type="email" placeholder="Your email address" class="px-4 py-3 bg-gray-700 text-white border-none rounded-l focus:outline-none focus:ring-2 focus:ring-primary flex-grow">
+                        <button type="submit" class="px-4 py-3 bg-primary text-white rounded-r hover:bg-blue-600 transition-colors duration-300">
+                            <i class="ri-send-plane-fill"></i>
+                        </button>
+                    </div>
+                </form>
+                <div class="flex items-center">
+                    <div class="custom-switch" id="newsletter-switch">
+                        <div class="switch-track"></div>
+                        <div class="switch-thumb"></div>
+                    </div>
+                    <span class="ml-2 text-gray-400">Receive promotional emails</span>
+                </div>
+            </div>
+        </div>
+        <div class="pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center">
+            <p class="text-gray-400 text-center md:text-left mb-4 md:mb-0">© 2025 AutoCare Pro. All rights reserved.</p>
+            <div class="flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Privacy Policy</a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Terms of Service</a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Cookie Policy</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Mobile Menu Script -->
+<script id="mobile-menu-script">
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+    mobileMenuButton.addEventListener('click', function() {
+        mobileMenu.classList.toggle('hidden');
+    });
+    // Close mobile menu when clicking on a link
+    const mobileLinks = mobileMenu.querySelectorAll('a');
+    mobileLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            mobileMenu.classList.add('hidden');
+        });
+    });
+});
+</script>
+
+<!-- Loading Screen Script -->
+<script id="loading-screen-script">
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        const loadingScreen = document.getElementById('loading-screen');
+        loadingScreen.style.opacity = '0';
+        setTimeout(function() {
+            loadingScreen.style.display = 'none';
+        }, 500);
+    }, 2000); // Display loading screen for 2 seconds
+});
+</script>
+
+<!-- Scroll Animation Script -->
+<script id="scroll-animation-script">
+document.addEventListener('DOMContentLoaded', function() {
+    const fadeElements = document.querySelectorAll('.fade-in');
+    function checkFade() {
+        fadeElements.forEach(element => {
+            const elementTop = element.getBoundingClientRect().top;
+            const elementBottom = element.getBoundingClientRect().bottom;
+            const isVisible = (elementTop < window.innerHeight - 100) && (elementBottom > 0);
+            if (isVisible) {
+                element.classList.add('appear');
+            }
+        });
+    }
+    // Initial check
+    checkFade();
+    // Check on scroll
+    window.addEventListener('scroll', checkFade);
+});
+</script>
+
+<!-- Admin Dashboard Specific Scripts -->
+<script id="admin-dashboard-script">
+document.addEventListener('DOMContentLoaded', function() {
+    const serviceVehiclesList = document.getElementById('service-vehicles-list');
+    const noServiceVehiclesMessage = document.getElementById('no-service-vehicles-message');
+    const addServiceForm = document.getElementById('add-service-form');
+    const scrollToAddVehicleButton = document.getElementById('scroll-to-add-vehicle');
+
+    // Function to update the visibility of the "no service vehicles" message
+    const updateNoServiceVehiclesMessage = () => {
+        if (serviceVehiclesList.children.length === 0) {
+            noServiceVehiclesMessage.classList.remove('hidden');
+        } else {
+            noServiceVehiclesMessage.classList.add('hidden');
+        }
+    };
+
+    updateNoServiceVehiclesMessage(); // Initial check when the page loads
+
+    // Scroll to Add Vehicle Form
+    if (scrollToAddVehicleButton && addServiceForm) {
+        scrollToAddVehicleButton.addEventListener('click', function() {
+            addServiceForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('new-make').focus();
+        });
+    }
+
+    // Handle Add New Service Entry Form Submission
+    addServiceForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        // Get form values
+        const make = document.getElementById('new-make').value;
+        const model = document.getElementById('new-model').value;
+        const licensePlate = document.getElementById('new-license-plate').value;
+        const customerName = document.getElementById('customer-name').value;
+        const customerPhone = document.getElementById('customer-phone').value;
+        const initialStatus = document.getElementById('initial-status').value;
+
+        // In a real application, you would send this data to a backend (e.g., Firestore)
+        console.log('New Service Entry Details:', {
+            make,
+            model,
+            licensePlate,
+            customerName,
+            customerPhone,
+            initialStatus
+        });
+
+        // For demonstration, dynamically add a new vehicle card
+        const newVehicleCardHtml = `
+            <div class="service-vehicle-card bg-gray-50 p-6 rounded-lg shadow-sm flex flex-col justify-between" data-license-plate="${licensePlate}">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <i class="ri-motorcycle-line ri-xl text-primary"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-800">${make} ${model}</h3>
+                    </div>
+                    <ul class="text-gray-600 space-y-2 text-sm mb-4">
+                        <li><span class="font-medium">License Plate:</span> ${licensePlate}</li>
+                        <li><span class="font-medium">Customer:</span> ${customerName}</li>
+                        <li><span class="font-medium">Phone:</span> <a href="tel:${customerPhone}" class="text-blue-600 hover:underline">${customerPhone}</a></li>
+                    </ul>
+                    <div class="mb-4">
+                        <span class="text-sm font-medium">Status:</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase status-${initialStatus}" data-current-status="${initialStatus}">
+                            ${initialStatus.replace(/-/g, ' ')}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label for="status-${licensePlate.replace(/[^a-zA-Z0-9]/g, '')}" class="text-sm text-gray-600">Update Status:</label>
+                        <select id="status-${licensePlate.replace(/[^a-zA-Z0-9]/g, '')}" class="status-selector flex-grow px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary">
+                            <option value="pending" ${initialStatus === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="in-progress" ${initialStatus === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                            <option value="completed" ${initialStatus === 'completed' ? 'selected' : ''}>Completed</option>
+                            <option value="ready-for-pickup" ${initialStatus === 'ready-for-pickup' ? 'selected' : ''}>Ready for Pickup</option>
+                            <option value="cancelled" ${initialStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                        <button data-vehicle-id="${licensePlate}" class="update-status-btn px-3 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors">
+                            Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        serviceVehiclesList.insertAdjacentHTML('beforeend', newVehicleCardHtml);
+        updateNoServiceVehiclesMessage(); // Update message visibility
+
+        addServiceForm.reset(); // Clear the form
+        alert('New service entry added!'); // Using alert for demo
+    });
+
+    // Handle Status Update Button Click
+    serviceVehiclesList.addEventListener('click', function(event) {
+        const updateButton = event.target.closest('.update-status-btn');
+        if (updateButton) {
+            const vehicleCard = updateButton.closest('.service-vehicle-card');
+            const licensePlate = vehicleCard.dataset.licensePlate;
+            const statusSelector = vehicleCard.querySelector('.status-selector');
+            const newStatus = statusSelector.value;
+            const statusSpan = vehicleCard.querySelector('[data-current-status]');
+
+            // Update the display
+            statusSpan.className = `px-3 py-1 rounded-full text-xs font-semibold uppercase status-${newStatus}`;
+            statusSpan.textContent = newStatus.replace(/-/g, ' ');
+            statusSpan.dataset.currentStatus = newStatus;
+
+            // In a real application, you would send this update to a backend
+            console.log(`Vehicle ${licensePlate} status updated to: ${newStatus}`);
+            alert(`Status for ${licensePlate} updated to "${newStatus.replace(/-/g, ' ')}"!`);
+            // This update would then trigger a change on the user dashboard
+        }
+    });
+});
+</script>
+
+<!-- Navbar Scroll Effect Script -->
+<script id="navbar-scroll-script">
+document.addEventListener('DOMContentLoaded', function() {
+    const navbar = document.getElementById('navbar');
+    function handleScroll() {
+        if (window.scrollY > 50) {
+            navbar.classList.add('py-2');
+            navbar.classList.add('shadow-lg');
+        } else {
+            navbar.classList.remove('py-2');
+            navbar.classList.remove('shadow-lg');
+        }
+    }
+    window.addEventListener('scroll', handleScroll);
+});
+</script>
+
+<!-- Smooth Scroll Script -->
+<script id="smooth-scroll-script">
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            if (targetId === '#') return;
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80, /* Adjust for fixed header height */
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>

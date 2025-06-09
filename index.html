@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maosaji Honda - Professional Motorcycle Servicing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'#e31837',secondary:'#000000'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+body {
+font-family: 'Poppins', sans-serif;
+scroll-behavior: smooth;
+}
+.loading-screen {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(135deg, #f0f9ff 0%, #e1f5fe 100%);
+display: flex;
+justify-content: center;
+align-items: center;
+z-index: 9999;
+opacity: 1;
+transition: opacity 0.5s ease-out;
+}
+.loader {
+position: relative;
+width: 120px;
+height: 120px;
+}
+.loader-circle {
+position: absolute;
+width: 100%;
+height: 100%;
+border: 4px solid transparent;
+border-top-color: #3b82f6;
+border-radius: 50%;
+animation: spin 1s linear infinite;
+}
+.loader-circle:nth-child(2) {
+width: 80%;
+height: 80%;
+top: 10%;
+left: 10%;
+border-top-color: #10b981;
+animation-duration: 1.3s;
+}
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+.logo-pulse {
+animation: pulse 2s infinite;
+}
+@keyframes pulse {
+0% { transform: scale(1); }
+50% { transform: scale(1.05); }
+100% { transform: scale(1); }
+}
+.fade-in {
+opacity: 0;
+transform: translateY(20px);
+transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.fade-in.appear {
+opacity: 1;
+transform: translateY(0);
+}
+.service-card {
+transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.service-card:hover {
+transform: translateY(-5px);
+box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+.service-icon {
+transition: transform 0.3s ease;
+}
+.service-card:hover .service-icon {
+transform: scale(1.1);
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+-webkit-appearance: none;
+margin: 0;
+}
+.custom-checkbox {
+position: relative;
+display: inline-block;
+width: 20px;
+height: 20px;
+background-color: #fff;
+border: 2px solid #d1d5db;
+border-radius: 4px;
+transition: all 0.2s ease;
+}
+.custom-checkbox.checked {
+background-color: #3b82f6;
+border-color: #3b82f6;
+}
+.custom-checkbox.checked::after {
+content: '';
+position: absolute;
+top: 2px;
+left: 6px;
+width: 6px;
+height: 10px;
+border: solid white;
+border-width: 0 2px 2px 0;
+transform: rotate(45deg);
+}
+.custom-switch {
+position: relative;
+display: inline-block;
+width: 48px;
+height: 24px;
+}
+.switch-track {
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+bottom: 0;
+background-color: #e5e7eb;
+border-radius: 24px;
+transition: background-color 0.3s ease;
+}
+.switch-thumb {
+position: absolute;
+top: 2px;
+left: 2px;
+width: 20px;
+height: 20px;
+background-color: white;
+border-radius: 50%;
+transition: transform 0.3s ease;
+box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.switch-active .switch-track {
+background-color: #3b82f6;
+}
+.switch-active .switch-thumb {
+transform: translateX(24px);
+}
+.hero-section {
+position: relative;
+overflow: hidden;
+}
+.hero-bg {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+z-index: -1;
+background-size: cover;
+background-position: center;
+}
+.hero-overlay {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.3) 100%);
+z-index: -1;
+}
+</style>
+</head>
+<body>
+<!-- Loading Screen -->
+<div class="loading-screen" id="loading-screen">
+<div class="flex flex-col items-center">
+<div class="logo-pulse text-4xl font-['Pacifico'] text-primary mb-4">logo</div>
+<div class="loader">
+<div class="loader-circle"></div>
+<div class="loader-circle"></div>
+</div>
+<p class="mt-4 text-gray-600">Loading amazing service...</p>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="bg-white shadow-md fixed w-full z-50 transition-all duration-300" id="navbar">
+<div class="container mx-auto px-4 py-3">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2">
+<img src="https://static.readdy.ai/image/37ac7cf2068439d6c30c12e5ad957f85/cf039908287dcf84123e6dde02bea2bc.png" alt="Honda Logo" class="h-8">
+<a href="#" class="text-2xl font-bold text-primary">Maosaji Honda</a>
+</div>
+<div class="hidden md:flex items-center space-x-8">
+<a href="#home" class="text-gray-700 hover:text-primary transition-colors duration-300">Home</a>
+<a href="#services" class="text-gray-700 hover:text-primary transition-colors duration-300">Services</a>
+<a href="#about" class="text-gray-700 hover:text-primary transition-colors duration-300">About</a>
+<a href="#why-us" class="text-gray-700 hover:text-primary transition-colors duration-300">Why Us</a>
+<a href="#contact" class="text-gray-700 hover:text-primary transition-colors duration-300">Contact</a>
+</div>
+<div class="hidden md:flex items-center space-x-4">
+<button class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log In</button>
+<button class="px-4 py-2 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">Sign Up</button>
+</div>
+<div class="md:hidden flex items-center">
+<button id="mobile-menu-button" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-primary">
+<i class="ri-menu-line ri-lg"></i>
+</button>
+</div>
+</div>
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="md:hidden hidden mt-4 pb-2">
+<div class="flex flex-col space-y-3">
+<a href="#home" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Home</a>
+<a href="#services" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Services</a>
+<a href="#about" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">About</a>
+<a href="#why-us" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Why Us</a>
+<a href="#contact" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Contact</a>
+<div class="flex space-x-4 pt-2">
+<button class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log In</button>
+<button class="px-4 py-2 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">Sign Up</button>
+</div>
+</div>
+</div>
+</div>
+</nav>
+<!-- Hero Section -->
+<section id="home" class="hero-section min-h-screen flex items-center pt-16">
+<div class="hero-bg" style="background-image: url('https://readdy.ai/api/search-image?query=modern%2520professional%2520honda%2520motorcycle%2520service%2520center%2520with%2520clean%2520environment%2520and%2520motorcycles%2520being%2520serviced%2520by%2520mechanics%2520in%2520red%2520honda%2520uniform%252C%2520bright%2520lighting%252C%2520high-end%2520tools%2520and%2520equipment%252C%2520showroom%2520quality%2520appearance%252C%2520left%2520side%2520with%2520clean%2520white%2520gradient%2520for%2520text%2520overlay&width=1920&height=1080&seq=hero1&orientation=landscape');"></div>
+<div class="hero-overlay"></div>
+<div class="container mx-auto px-4 w-full">
+<div class="flex flex-col md:flex-row items-center">
+<div class="w-full md:w-1/2 fade-in">
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-gray-800">Authorized Honda <span class="text-primary">Motorcycle</span> Service Center</h1>
+<p class="text-lg md:text-xl text-gray-600 mb-8">Official Honda motorcycle maintenance and repair services by certified technicians using genuine Honda parts. Experience the excellence of authorized Honda servicing.</p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="px-7 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap flex items-center justify-center" href="#contact">
+Get in touch
+</button>
+<button class="px-6 py-3 border border-gray-300 text-gray-700 hover:border-primary hover:text-primary transition-colors duration-300 !rounded-button whitespace-nowrap flex items-center justify-center">
+<i class="ri-phone-line mr-2"></i> Call Now
+</button>
+</div>
+</div>
+<div class="w-full md:w-1/2">
+<!-- Right side is covered by the background image -->
+</div>
+</div>
+<div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce hidden md:block">
+<a href="#services" class="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center">
+<i class="ri-arrow-down-line text-primary"></i>
+</a>
+</div>
+</div>
+</section>
+<!-- Services Section -->
+<section id="services" class="py-20 bg-gray-50">
+<div class="container mx-auto px-4">
+<div class="text-center mb-16 fade-in">
+<h2 class="text-3xl md:text-4xl font-bold mb-4">Our Services</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">We offer comprehensive vehicle maintenance and repair services to keep your car running smoothly and safely on the road.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Service Card 1 -->
+<div class="service-card bg-white rounded-lg shadow-md overflow-hidden fade-in">
+<div class="p-6">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 service-icon">
+<i class="ri-oil-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3">Oil Change</h3>
+<p class="text-gray-600 mb-4">Regular oil changes to keep your engine running smoothly and extend its life. We use premium quality oils suited for your vehicle.</p>
+<a href="#" class="text-primary hover:text-blue-700 flex items-center">
+Learn More <i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+<!-- Service Card 2 -->
+<div class="service-card bg-white rounded-lg shadow-md overflow-hidden fade-in">
+<div class="p-6">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 service-icon">
+<i class="ri-steering-2-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3">Brake Service</h3>
+<p class="text-gray-600 mb-4">Complete brake inspection and repair services including pad replacement, rotor resurfacing, and hydraulic system maintenance.</p>
+<a href="#" class="text-primary hover:text-blue-700 flex items-center">
+Learn More <i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+<!-- Service Card 3 -->
+<div class="service-card bg-white rounded-lg shadow-md overflow-hidden fade-in">
+<div class="p-6">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 service-icon">
+<i class="ri-dashboard-3-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3">Diagnostics</h3>
+<p class="text-gray-600 mb-4">Advanced computer diagnostics to identify and troubleshoot electrical and mechanical issues with precision and accuracy.</p>
+<a href="#" class="text-primary hover:text-blue-700 flex items-center">
+Learn More <i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+<!-- Service Card 4 -->
+<div class="service-card bg-white rounded-lg shadow-md overflow-hidden fade-in">
+<div class="p-6">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 service-icon">
+<i class="ri-battery-2-charge-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3">Battery Service</h3>
+<p class="text-gray-600 mb-4">Battery testing, replacement, and electrical system checks to ensure reliable starting and optimal electrical performance.</p>
+<a href="#" class="text-primary hover:text-blue-700 flex items-center">
+Learn More <i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+<!-- Service Card 5 -->
+<div class="service-card bg-white rounded-lg shadow-md overflow-hidden fade-in">
+<div class="p-6">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 service-icon">
+<i class="ri-settings-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3">Engine Repair</h3>
+<p class="text-gray-600 mb-4">Comprehensive engine repair services from minor tune-ups to major overhauls, performed by our experienced technicians.</p>
+<a href="#" class="text-primary hover:text-blue-700 flex items-center">
+Learn More <i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+<!-- Service Card 6 -->
+<div class="service-card bg-white rounded-lg shadow-md overflow-hidden fade-in">
+<div class="p-6">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 service-icon">
+<i class="ri-temp-cold-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3">A/C Service</h3>
+<p class="text-gray-600 mb-4">Air conditioning system inspection, recharge, and repair to keep you comfortable in any weather condition.</p>
+<a href="#" class="text-primary hover:text-blue-700 flex items-center">
+Learn More <i class="ri-arrow-right-line ml-1"></i>
+</a>
+</div>
+</div>
+</div>
+<div class="text-center mt-12 fade-in">
+<button class="px-6 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">
+View All Services
+</button>
+</div>
+</div>
+</section>
+<!-- About Section -->
+<section id="about" class="py-20 bg-white">
+<div class="container mx-auto px-4">
+<div class="flex flex-col lg:flex-row items-center gap-12">
+<div class="w-full lg:w-1/2 fade-in">
+<img src="https://readdy.ai/api/search-image?query=professional%2520honda%2520motorcycle%2520service%2520center%2520with%2520hero%2520honda%2520bikes%2520being%2520serviced%2520by%2520skilled%2520technicians%2520in%2520red%2520honda%2520uniforms%252C%2520clean%2520modern%2520workspace%252C%2520specialized%2520tools%2520and%2520equipment%252C%2520bright%2520lighting%252C%2520professional%2520atmosphere&width=800&height=600&seq=about2&orientation=landscape" alt="Our Workshop" class="rounded-lg shadow-xl w-full h-auto object-cover">
+</div>
+<div class="w-full lg:w-1/2 fade-in">
+<h2 class="text-3xl md:text-4xl font-bold mb-6">About Maosaji Honda</h2>
+<p class="text-gray-600 mb-6">As an authorized Honda motorcycle service center, Maosaji Honda has been the trusted name in motorcycle maintenance and repair since 2010. Our mission is to provide exceptional service that keeps your Honda motorcycle performing at its peak.</p>
+<p class="text-gray-600 mb-6">With Honda-certified technicians and specialized diagnostic equipment, we ensure your motorcycle receives genuine Honda parts and expert care that meets the highest standards of quality and reliability.</p>
+<div class="grid grid-cols-2 gap-6 mb-8">
+<div class="flex flex-col">
+<span class="text-3xl font-bold text-primary counter">15+</span>
+<span class="text-gray-600">Years Experience</span>
+</div>
+<div class="flex flex-col">
+<span class="text-3xl font-bold text-primary counter">10,000+</span>
+<span class="text-gray-600">Happy Customers</span>
+</div>
+<div class="flex flex-col">
+<span class="text-3xl font-bold text-primary counter">25+</span>
+<span class="text-gray-600">Expert Technicians</span>
+</div>
+<div class="flex flex-col">
+<span class="text-3xl font-bold text-primary counter">100%</span>
+<span class="text-gray-600">Service Guarantee</span>
+</div>
+</div>
+<button class="px-6 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">
+Learn More About Us
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Why Choose Us Section -->
+<section id="why-us" class="py-20 bg-gray-50">
+<div class="container mx-auto px-4">
+<div class="text-center mb-16 fade-in">
+<h2 class="text-3xl md:text-4xl font-bold mb-4">Why Choose Us</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">We pride ourselves on delivering exceptional service that sets us apart from other automotive service providers.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Reason 1 -->
+<div class="bg-white p-6 rounded-lg shadow-md fade-in">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+<i class="ri-shield-check-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-center">Certified Technicians</h3>
+<p class="text-gray-600 text-center">Our ASE-certified technicians have years of experience and ongoing training to handle any vehicle make or model.</p>
+</div>
+<!-- Reason 2 -->
+<div class="bg-white p-6 rounded-lg shadow-md fade-in">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+<i class="ri-tools-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-center">State-of-the-Art Equipment</h3>
+<p class="text-gray-600 text-center">We invest in the latest diagnostic and repair equipment to ensure accurate and efficient service for your vehicle.</p>
+</div>
+<!-- Reason 3 -->
+<div class="bg-white p-6 rounded-lg shadow-md fade-in">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+<i class="ri-time-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-center">Quick Turnaround</h3>
+<p class="text-gray-600 text-center">We respect your time and work efficiently to get you back on the road as quickly as possible without compromising quality.</p>
+</div>
+<!-- Reason 4 -->
+<div class="bg-white p-6 rounded-lg shadow-md fade-in">
+<div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+<i class="ri-wallet-3-line ri-xl text-primary"></i>
+</div>
+<h3 class="text-xl font-semibold mb-3 text-center">Transparent Pricing</h3>
+<p class="text-gray-600 text-center">No hidden fees or surprise costs. We provide detailed estimates and keep you informed throughout the service process.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Testimonials Placeholder Section -->
+<section class="py-20 bg-white">
+<div class="container mx-auto px-4">
+<div class="text-center mb-12 fade-in">
+<h2 class="text-3xl md:text-4xl font-bold mb-4">Customer Testimonials</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">We're building our collection of customer experiences. Be among the first to share your feedback!</p>
+</div>
+<div class="bg-gray-50 p-8 rounded-lg shadow-md max-w-3xl mx-auto text-center fade-in">
+<div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6 mx-auto">
+<i class="ri-chat-quote-line ri-2x text-primary"></i>
+</div>
+<h3 class="text-2xl font-semibold mb-6">Testimonials Coming Soon</h3>
+<p class="text-gray-600 mb-8">We're committed to providing exceptional service that our customers love to talk about. Check back soon to see what others are saying about their experience with us.</p>
+<div class="max-w-md mx-auto">
+<div class="flex flex-col sm:flex-row gap-4">
+<input type="email" placeholder="Enter your email" class="flex-grow px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+<button class="px-6 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">
+Get Updates
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Contact Section -->
+<section id="contact" class="py-20 bg-gray-50">
+<div class="container mx-auto px-4">
+<div class="text-center mb-16 fade-in">
+<h2 class="text-3xl md:text-4xl font-bold mb-4">Get In Touch</h2>
+<p class="text-gray-600 max-w-2xl mx-auto">Have questions or ready to schedule your service? Contact us today and our friendly team will be happy to assist you.</p>
+</div>
+<div class="flex flex-col lg:flex-row gap-12">
+<!-- Contact Form -->
+<div class="w-full lg:w-1/2 fade-in">
+<div class="bg-white p-8 rounded-lg shadow-md">
+<h3 class="text-2xl font-semibold mb-6">Send Us a Message</h3>
+<form>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div>
+<label for="name" class="block text-gray-700 mb-2">Full Name</label>
+<input type="text" id="name" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="John Smith">
+</div>
+<div>
+<label for="email" class="block text-gray-700 mb-2">Email Address</label>
+<input type="email" id="email" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="john@example.com">
+</div>
+</div>
+<div class="mb-6">
+<label for="phone" class="block text-gray-700 mb-2">Phone Number</label>
+<input type="tel" id="phone" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="(123) 456-7890">
+</div>
+<div class="mb-6">
+<label for="service" class="block text-gray-700 mb-2">Service Needed</label>
+<div class="relative">
+<select id="service" class="w-full px-4 py-3 border border-gray-300 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-8">
+<option value="" disabled selected>Select a service</option>
+<option value="oil-change">Oil Change</option>
+<option value="brake-service">Brake Service</option>
+<option value="diagnostics">Diagnostics</option>
+<option value="battery">Battery Service</option>
+<option value="engine">Engine Repair</option>
+<option value="ac">A/C Service</option>
+<option value="other">Other</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line text-gray-400"></i>
+</div>
+</div>
+</div>
+<div class="mb-6">
+<label for="message" class="block text-gray-700 mb-2">Message</label>
+<textarea id="message" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Tell us about your vehicle and service needs..."></textarea>
+</div>
+<div class="flex items-center mb-6">
+<div class="custom-checkbox" id="consent-checkbox"></div>
+<label for="consent-checkbox" class="ml-2 text-gray-700 cursor-pointer">I agree to receive service updates and promotional offers</label>
+</div>
+<button type="submit" class="w-full px-6 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">
+Send Message
+</button>
+</form>
+</div>
+</div>
+<!-- Contact Info -->
+<div class="w-full lg:w-1/2 fade-in">
+<div class="bg-white p-8 rounded-lg shadow-md mb-8">
+<h3 class="text-2xl font-semibold mb-6">Contact Information</h3>
+<div class="space-y-4">
+<div class="flex items-start">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4 mt-1">
+<i class="ri-map-pin-line text-primary"></i>
+</div>
+<div>
+<h4 class="font-semibold text-gray-800">Address</h4>
+<p class="text-gray-600">1234 Service Drive, Automotive City, AC 12345</p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4 mt-1">
+<i class="ri-phone-line text-primary"></i>
+</div>
+<div>
+<h4 class="font-semibold text-gray-800">Phone</h4>
+<p class="text-gray-600">(123) 456-7890</p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4 mt-1">
+<i class="ri-mail-line text-primary"></i>
+</div>
+<div>
+<h4 class="font-semibold text-gray-800">Email</h4>
+<p class="text-gray-600">service@autocarepro.com</p>
+</div>
+</div>
+<div class="flex items-start">
+<div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4 mt-1">
+<i class="ri-time-line text-primary"></i>
+</div>
+<div>
+<h4 class="font-semibold text-gray-800">Business Hours</h4>
+<p class="text-gray-600">Monday - Friday: 8:00 AM - 6:00 PM</p>
+<p class="text-gray-600">Saturday: 9:00 AM - 3:00 PM</p>
+<p class="text-gray-600">Sunday: Closed</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white p-8 rounded-lg shadow-md">
+<h3 class="text-2xl font-semibold mb-6">Book a Call</h3>
+<p class="text-gray-600 mb-6">Prefer to speak with us directly? Schedule a call and we'll contact you at your preferred time.</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+<div>
+<label for="call-name" class="block text-gray-700 mb-2">Your Name</label>
+<input type="text" id="call-name" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="John Smith">
+</div>
+<div>
+<label for="call-phone" class="block text-gray-700 mb-2">Phone Number</label>
+<input type="tel" id="call-phone" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="(123) 456-7890">
+</div>
+</div>
+<div class="mb-6">
+<label for="call-time" class="block text-gray-700 mb-2">Preferred Time</label>
+<div class="relative">
+<select id="call-time" class="w-full px-4 py-3 border border-gray-300 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-8">
+<option value="" disabled selected>Select a time</option>
+<option value="morning">Morning (9AM - 12PM)</option>
+<option value="afternoon">Afternoon (12PM - 3PM)</option>
+<option value="evening">Evening (3PM - 6PM)</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+<i class="ri-arrow-down-s-line text-gray-400"></i>
+</div>
+</div>
+</div>
+<button class="w-full px-6 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">
+Schedule Call
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Map Section -->
+<section class="h-96 relative overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://public.readdy.ai/gen_page/map_placeholder_1280x720.png');"></div>
+<div class="absolute inset-0 bg-black bg-opacity-20 flex items-center justify-center">
+<div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full text-center">
+<h3 class="text-2xl font-semibold mb-4">Visit Our Location</h3>
+<p class="text-gray-600 mb-6">We're conveniently located in the heart of Automotive City with easy access and ample parking.</p>
+<button class="px-6 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">
+<i class="ri-navigation-line mr-2"></i> Get Directions
+</button>
+</div>
+</div>
+</section>
+<!-- Footer -->
+<footer class="bg-gray-800 text-white pt-16 pb-8">
+<div class="container mx-auto px-4">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+<!-- Company Info -->
+<div>
+<div class="flex items-center gap-2 mb-6">
+<img src="https://static.readdy.ai/image/37ac7cf2068439d6c30c12e5ad957f85/cf039908287dcf84123e6dde02bea2bc.png" alt="Honda Logo" class="h-8">
+<h3 class="text-xl font-bold text-primary">Maosaji Honda</h3>
+</div>
+<p class="text-gray-400 mb-6">Authorized Honda motorcycle service center providing professional maintenance to keep your bike performing at its best.</p>
+<div class="flex space-x-4">
+<a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
+<i class="ri-facebook-fill"></i>
+</a>
+<a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
+<i class="ri-twitter-fill"></i>
+</a>
+<a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
+<i class="ri-instagram-line"></i>
+</a>
+<a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
+<i class="ri-youtube-fill"></i>
+</a>
+</div>
+</div>
+<!-- Quick Links -->
+<div>
+<h4 class="text-lg font-semibold mb-6">Quick Links</h4>
+<ul class="space-y-3">
+<li><a href="#home" class="text-gray-400 hover:text-white transition-colors duration-300">Home</a></li>
+<li><a href="#services" class="text-gray-400 hover:text-white transition-colors duration-300">Services</a></li>
+<li><a href="#about" class="text-gray-400 hover:text-white transition-colors duration-300">About Us</a></li>
+<li><a href="#why-us" class="text-gray-400 hover:text-white transition-colors duration-300">Why Choose Us</a></li>
+<li><a href="#contact" class="text-gray-400 hover:text-white transition-colors duration-300">Contact</a></li>
+</ul>
+</div>
+<!-- Services -->
+<div>
+<h4 class="text-lg font-semibold mb-6">Our Services</h4>
+<ul class="space-y-3">
+<li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Oil Change</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Brake Service</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Diagnostics</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Battery Service</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Engine Repair</a></li>
+<li><a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">A/C Service</a></li>
+</ul>
+</div>
+<!-- Newsletter -->
+<div>
+<h4 class="text-lg font-semibold mb-6">Newsletter</h4>
+<p class="text-gray-400 mb-6">Subscribe to our newsletter for the latest service offers and automotive tips.</p>
+<form class="mb-4">
+<div class="flex">
+<input type="email" placeholder="Your email address" class="px-4 py-3 bg-gray-700 text-white border-none rounded-l focus:outline-none focus:ring-2 focus:ring-primary flex-grow">
+<button type="submit" class="px-4 py-3 bg-primary text-white rounded-r hover:bg-blue-600 transition-colors duration-300">
+<i class="ri-send-plane-fill"></i>
+</button>
+</div>
+</form>
+<div class="flex items-center">
+<div class="custom-switch" id="newsletter-switch">
+<div class="switch-track"></div>
+<div class="switch-thumb"></div>
+</div>
+<span class="ml-2 text-gray-400">Receive promotional emails</span>
+</div>
+</div>
+</div>
+<div class="pt-8 border-t border-gray-700 flex flex-col md:flex-row justify-between items-center">
+<p class="text-gray-400 text-center md:text-left mb-4 md:mb-0">© 2025 AutoCare Pro. All rights reserved.</p>
+<div class="flex space-x-6">
+<a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Privacy Policy</a>
+<a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Terms of Service</a>
+<a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Cookie Policy</a>
+</div>
+</div>
+</div>
+</footer>
+<!-- Mobile Menu Script -->
+<script id="mobile-menu-script">
+document.addEventListener('DOMContentLoaded', function() {
+const mobileMenuButton = document.getElementById('mobile-menu-button');
+const mobileMenu = document.getElementById('mobile-menu');
+mobileMenuButton.addEventListener('click', function() {
+mobileMenu.classList.toggle('hidden');
+});
+// Close mobile menu when clicking on a link
+const mobileLinks = mobileMenu.querySelectorAll('a');
+mobileLinks.forEach(link => {
+link.addEventListener('click', function() {
+mobileMenu.classList.add('hidden');
+});
+});
+});
+</script>
+<!-- Loading Screen Script -->
+<script id="loading-screen-script">
+document.addEventListener('DOMContentLoaded', function() {
+setTimeout(function() {
+const loadingScreen = document.getElementById('loading-screen');
+loadingScreen.style.opacity = '0';
+setTimeout(function() {
+loadingScreen.style.display = 'none';
+}, 500);
+}, 2000);
+});
+</script>
+<!-- Scroll Animation Script -->
+<script id="scroll-animation-script">
+document.addEventListener('DOMContentLoaded', function() {
+const fadeElements = document.querySelectorAll('.fade-in');
+function checkFade() {
+fadeElements.forEach(element => {
+const elementTop = element.getBoundingClientRect().top;
+const elementBottom = element.getBoundingClientRect().bottom;
+const isVisible = (elementTop < window.innerHeight - 100) && (elementBottom > 0);
+if (isVisible) {
+element.classList.add('appear');
+}
+});
+}
+// Initial check
+checkFade();
+// Check on scroll
+window.addEventListener('scroll', checkFade);
+});
+</script>
+<!-- Form Interaction Script -->
+<script id="form-interaction-script">
+document.addEventListener('DOMContentLoaded', function() {
+// Custom checkbox
+const consentCheckbox = document.getElementById('consent-checkbox');
+if (consentCheckbox) {
+consentCheckbox.addEventListener('click', function() {
+this.classList.toggle('checked');
+});
+}
+// Custom switch
+const newsletterSwitch = document.getElementById('newsletter-switch');
+if (newsletterSwitch) {
+newsletterSwitch.addEventListener('click', function() {
+this.classList.toggle('switch-active');
+});
+}
+// Form validation
+const contactForm = document.querySelector('#contact form');
+if (contactForm) {
+contactForm.addEventListener('submit', function(e) {
+e.preventDefault();
+// Simple validation example
+const nameInput = document.getElementById('name');
+const emailInput = document.getElementById('email');
+if (!nameInput.value.trim()) {
+alert('Please enter your name');
+nameInput.focus();
+return;
+}
+if (!emailInput.value.trim()) {
+alert('Please enter your email');
+emailInput.focus();
+return;
+}
+// If validation passes
+alert('Thank you for your message! We will contact you soon.');
+contactForm.reset();
+});
+}
+});
+</script>
+<!-- Navbar Scroll Effect Script -->
+<script id="navbar-scroll-script">
+document.addEventListener('DOMContentLoaded', function() {
+const navbar = document.getElementById('navbar');
+function handleScroll() {
+if (window.scrollY > 50) {
+navbar.classList.add('py-2');
+navbar.classList.add('shadow-lg');
+} else {
+navbar.classList.remove('py-2');
+navbar.classList.remove('shadow-lg');
+}
+}
+window.addEventListener('scroll', handleScroll);
+});
+</script>
+<!-- Smooth Scroll Script -->
+<script id="smooth-scroll-script">
+document.addEventListener('DOMContentLoaded', function() {
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+anchor.addEventListener('click', function (e) {
+e.preventDefault();
+const targetId = this.getAttribute('href');
+if (targetId === '#') return;
+const targetElement = document.querySelector(targetId);
+if (targetElement) {
+window.scrollTo({
+top: targetElement.offsetTop - 80,
+behavior: 'smooth'
+});
+}
+});
+});
+});
+</script>
+</body>
+</html>
