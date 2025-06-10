@@ -175,6 +175,71 @@ input[type="number"]::-webkit-outer-spin-button {
 .switch-active .switch-thumb {
     transform: translateX(24px);
 }
+/* Custom Message Box Styles */
+.message-box {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4CAF50; /* Green for success */
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    min-width: 250px;
+    text-align: center;
+}
+.message-box.error {
+    background-color: #f44336; /* Red for error */
+}
+.message-box.show {
+    opacity: 1;
+}
+
+/* Status colors for services */
+.status-pending { background-color: #fef3c7; color: #d97706; } /* yellow-100, yellow-700 */
+.status-in-progress { background-color: #bfdbfe; color: #1d4ed8; } /* blue-200, blue-800 */
+.status-completed { background-color: #d1fae5; color: #065f46; } /* green-100, green-800 */
+.status-ready-for-pickup { background-color: #bae6fd; color: #0369a1; } /* lightblue-100, lightblue-800 */
+.status-cancelled { background-color: #fee2e2; color: #b91c1c; } /* red-100, red-700 */
+
+/* Confirmation Modal Styles */
+.confirmation-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10001;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+.confirmation-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+.confirmation-modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    transform: translateY(20px);
+    transition: transform 0.3s ease-in-out;
+}
+.confirmation-modal.show .confirmation-modal-content {
+    transform: translateY(0);
+}
 </style>
 </head>
 <body>
@@ -190,6 +255,21 @@ input[type="number"]::-webkit-outer-spin-button {
     </div>
 </div>
 
+<!-- Custom Message Box Container -->
+<div id="custom-message-box" class="message-box hidden"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="confirmation-modal">
+    <div class="confirmation-modal-content">
+        <h3 class="text-xl font-semibold mb-4 text-gray-800" id="confirmation-modal-title">Confirm Action</h3>
+        <p class="text-gray-600 mb-6" id="confirmation-modal-message">Are you sure you want to proceed?</p>
+        <div class="flex justify-center space-x-4">
+            <button id="confirm-yes" class="px-6 py-3 bg-red-500 text-white rounded-button font-medium hover:bg-red-600 transition-colors">Yes</button>
+            <button id="confirm-no" class="px-6 py-3 bg-gray-300 text-gray-800 rounded-button font-medium hover:bg-gray-400 transition-colors">No</button>
+        </div>
+    </div>
+</div>
+
 <!-- Navigation (Header) -->
 <nav class="bg-white shadow-md fixed w-full z-50 transition-all duration-300" id="navbar">
     <div class="container mx-auto px-4 py-3">
@@ -199,11 +279,12 @@ input[type="number"]::-webkit-outer-spin-button {
                 <a href="#" class="text-2xl font-bold text-primary">Maosaji Honda</a>
             </div>
             <div class="hidden md:flex items-center space-x-8">
-              <a href="/index.html" class="text-gray-700 hover:text-primary transition-colors duration-300">Home</a>
+              <a href="index.html" class="text-gray-700 hover:text-primary transition-colors duration-300">Home</a>
                 <a href="#my-vehicles" class="text-gray-700 hover:text-primary transition-colors duration-300">My Vehicles</a>
                 <a href="#add-vehicle" class="text-gray-700 hover:text-primary transition-colors duration-300">Add Vehicle</a>
                 <a href="#my-services" class="text-gray-700 hover:text-primary transition-colors duration-300">My Services</a>
                 <a href="#profile" class="text-gray-700 hover:text-primary transition-colors duration-300">Profile</a>
+                <button id="logout-button" class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log Out</button>
             </div>
             <div class="md:hidden flex items-center">
                 <button id="mobile-menu-button" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-primary">
@@ -214,11 +295,12 @@ input[type="number"]::-webkit-outer-spin-button {
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="md:hidden hidden mt-4 pb-2">
             <div class="flex flex-col space-y-3">
-              <a href="/index.html" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Home</a>
+              <a href="index.html" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Home</a>
                 <a href="#my-vehicles" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">My Vehicles</a>
                 <a href="#add-vehicle" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Add Vehicle</a>
                 <a href="#my-services" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">My Services</a>
                 <a href="#profile" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Profile</a>
+                <button id="logout-button-mobile" class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log Out</button>
             </div>
         </div>
     </div>
@@ -229,7 +311,7 @@ input[type="number"]::-webkit-outer-spin-button {
     <div class="container mx-auto px-4">
         <!-- Welcome Section -->
         <section class="mb-12 fade-in">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Welcome, User!</h1>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Welcome, <span id="user-name">User</span>!</h1>
             <p class="text-lg text-gray-600">Manage your vehicles and services efficiently.</p>
         </section>
 
@@ -242,11 +324,10 @@ input[type="number"]::-webkit-outer-spin-button {
                 </button>
             </div>
             <div id="vehicles-list" class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Vehicle cards will be dynamically loaded here or default message shown -->
-                <!-- No hardcoded example vehicles are present here now -->
+                <!-- Vehicle cards will be dynamically loaded here -->
             </div>
             <!-- Message for no vehicles -->
-            <div id="no-vehicles-message" class="p-8 text-center text-gray-500">
+            <div id="no-vehicles-message" class="p-8 text-center text-gray-500 hidden">
                 <i class="ri-emotion-normal-line text-6xl mb-4"></i>
                 <p class="text-xl font-medium mb-4">No vehicles added yet!</p>
                 <p>Click "Add New Vehicle" to get started.</p>
@@ -269,6 +350,10 @@ input[type="number"]::-webkit-outer-spin-button {
                         <input type="text" id="vehicle-model" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="CBR600RR" required>
                     </div>
                     <div>
+                        <label for="vehicle-year" class="block text-gray-700 mb-2">Year</label>
+                        <input type="number" id="vehicle-year" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="2020" required min="1900" max="2099">
+                    </div>
+                    <div>
                         <label for="license-plate" class="block text-gray-700 mb-2">License Plate</label>
                         <input type="text" id="license-plate" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="KA01AB1234" required>
                     </div>
@@ -285,54 +370,34 @@ input[type="number"]::-webkit-outer-spin-button {
                 <h2 class="text-2xl font-bold text-gray-800">My Services</h2>
             </div>
             <div class="p-8">
-                <!-- Current Servicing Status -->
-                <div class="mb-8">
+                <!-- Current Servicing Status - Dynamically loaded -->
+                <div id="current-service-status-container" class="mb-8 hidden">
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Current Servicing Status</h3>
-                    <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 flex items-center space-x-4">
-                        <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-blue-700">
-                            <i class="ri-dashboard-line text-2xl"></i>
-                        </div>
-                        <div>
-                            <p class="text-gray-700 font-medium text-lg">Your Honda Activa (UP65CD5678) Service:</p>
-                            <span class="text-primary font-bold text-xl">In Progress</span> 
-                            <span class="text-gray-500 text-sm ml-2">(Estimated Completion: 2025-06-12)</span>
-                        </div>
-                    </div>
-                    <div class="text-sm text-gray-500 mt-2">
-                        Status last updated: 2025-06-10 14:30
-                    </div>
+                    <!-- Dynamic content will go here -->
+                </div>
+                <!-- Message for no current service -->
+                <div id="no-current-service-message" class="p-4 text-center text-gray-500">
+                    <i class="ri-information-line text-5xl mb-3"></i>
+                    <p class="text-md font-medium">No vehicle currently in service.</p>
                 </div>
 
-                <!-- Servicing History -->
+
+                <!-- Servicing History - Dynamically loaded -->
                 <div>
                     <h3 class="text-xl font-semibold text-gray-800 mb-4">Servicing History</h3>
                     <div id="service-history-list">
-                        <!-- Example Service History Item -->
-                        <div class="bg-gray-50 p-4 rounded-lg shadow-sm mb-4 flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-gray-800">Honda CBR600RR - Oil Change & Brake Service</p>
-                                <p class="text-sm text-gray-600">Service Date: 2024-05-10</p>
-                            </div>
-                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">Completed</span>
-                        </div>
-                        <div class="bg-gray-50 p-4 rounded-lg shadow-sm mb-4 flex justify-between items-center">
-                            <div>
-                                <p class="font-medium text-gray-800">Honda Activa 6G - Regular Maintenance</p>
-                                <p class="text-sm text-gray-600">Service Date: 2024-06-01</p>
-                            </div>
-                            <span class="px-3 py-1 bg-green-100 text-green-800 text-sm font-medium rounded-full">Completed</span>
-                        </div>
-                        <!-- Message for no service history -->
-                        <div id="no-service-history-message" class="p-4 text-center text-gray-500 hidden">
-                            <i class="ri-file-text-line text-5xl mb-3"></i>
-                            <p class="text-md font-medium">No service history found.</p>
-                        </div>
+                        <!-- Service history items will be dynamically loaded here -->
+                    </div>
+                    <!-- Message for no service history -->
+                    <div id="no-service-history-message" class="p-4 text-center text-gray-500 hidden">
+                        <i class="ri-file-text-line text-5xl mb-3"></i>
+                        <p class="text-md font-medium">No service history found.</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Profile Section (Placeholder) -->
+        <!-- Profile Section (Placeholder - could be expanded later) -->
         <section id="profile" class="py-12 bg-white rounded-lg shadow-md mt-12 fade-in">
             <div class="px-8 py-6 border-b border-gray-200">
                 <h2 class="text-2xl font-bold text-gray-800">My Profile</h2>
@@ -434,7 +499,7 @@ input[type="number"]::-webkit-outer-spin-button {
             <div class="flex space-x-6">
                 <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Privacy Policy</a>
                 <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Terms of Service</a>
-                <a href="#" class="text-400 hover:text-white transition-colors duration-300">Cookie Policy</a>
+                <a href="#" class="text-gray-400 hover:text-white transition-colors duration-300">Cookie Policy</a>
             </div>
         </div>
     </div>
@@ -494,26 +559,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <!-- Dashboard Specific Scripts -->
 <script id="dashboard-script">
-document.addEventListener('DOMContentLoaded', function() {
-    // Show/Hide Add Vehicle Form
-    const showAddVehicleButton = document.getElementById('show-add-vehicle-form');
-    const addVehicleFormSection = document.getElementById('add-vehicle');
-    if (showAddVehicleButton && addVehicleFormSection) {
-        showAddVehicleButton.addEventListener('click', function() {
-            // Smooth scroll to the add vehicle section
-            addVehicleFormSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            // Optionally, you might want to highlight the form or set focus
-            document.getElementById('vehicle-make').focus();
-        });
+    // Define the base URL for your deployed backend
+    const BASE_URL = 'https://honda-backend-ezro.onrender.com'; // Replace with your actual Render URL
+
+    // Helper function to display custom messages (success/error)
+    function showMessage(message, type = 'success') {
+        const msgBox = document.getElementById('custom-message-box');
+        msgBox.textContent = message;
+        msgBox.className = `message-box show ${type}`; // Add 'show' and type class
+        setTimeout(() => {
+            msgBox.classList.remove('show');
+            setTimeout(() => msgBox.classList.add('hidden'), 500); // Hide after fade out
+        }, 3000); // Message visible for 3 seconds
+        msgBox.classList.remove('hidden'); // Ensure it's not hidden if re-shown quickly
     }
 
-    // Handle Add Vehicle Form Submission
-    const addVehicleForm = document.getElementById('add-vehicle-form');
-    const vehiclesList = document.getElementById('vehicles-list');
-    const noVehiclesMessage = document.getElementById('no-vehicles-message');
+    // Function to get JWT token from local storage
+    function getToken() {
+        return localStorage.getItem('token');
+    }
+
+    // Function to decode JWT token and get user info (basic, for client-side display)
+    function decodeToken(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (error) {
+            console.error("Error decoding token:", error);
+            return null;
+        }
+    }
+
+    // Function to check authentication and redirect if no token
+    function checkAuthAndRedirect() {
+        const token = getToken();
+        if (!token) {
+            showMessage('You are not logged in. Redirecting to login page.', 'error');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1500); // Redirect after 1.5 seconds
+            return false;
+        }
+        return true;
+    }
 
     // Function to update the visibility of the "no vehicles" message
     const updateNoVehiclesMessage = () => {
+        const vehiclesList = document.getElementById('vehicles-list');
+        const noVehiclesMessage = document.getElementById('no-vehicles-message');
         if (vehiclesList.children.length === 0) {
             noVehiclesMessage.classList.remove('hidden');
         } else {
@@ -521,60 +618,357 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    updateNoVehiclesMessage(); // Initial check when the page loads
+    // Function to update the visibility of the "no service history" message
+    const updateNoServiceHistoryMessage = () => {
+        const serviceHistoryList = document.getElementById('service-history-list');
+        const noServiceHistoryMessage = document.getElementById('no-service-history-message');
+        if (serviceHistoryList.children.length === 0) {
+            noServiceHistoryMessage.classList.remove('hidden');
+        } else {
+            noServiceHistoryMessage.classList.add('hidden');
+        }
+    };
 
-    addVehicleForm.addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
-
-        // Get form values
-        const make = document.getElementById('vehicle-make').value;
-        const model = document.getElementById('vehicle-model').value;
-        const licensePlate = document.getElementById('license-plate').value;
-
-        // In a real application, you would send this data to a backend (e.g., Firestore)
-        console.log('New Vehicle Details:', {
-            make,
-            model,
-            licensePlate
-        });
-
-        // For demonstration, dynamically add a new vehicle card here
-        const newVehicleCardHtml = `
+    // Function to render a single vehicle card
+    function renderVehicleCard(vehicle) {
+        const vehicleCardHtml = `
             <div class="vehicle-card bg-gray-50 p-6 rounded-lg shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center mb-4">
                         <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4 vehicle-icon">
                             <i class="ri-motorcycle-line ri-xl text-primary"></i>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-800">${make} ${model}</h3>
+                        <h3 class="text-xl font-semibold text-gray-800">${vehicle.make} ${vehicle.model}</h3>
                     </div>
                     <ul class="text-gray-600 space-y-2 text-sm">
-                        <li><span class="font-medium">Make:</span> ${make}</li>
-                        <li><span class="font-medium">Model:</span> ${model}</li>
-                        <li><span class="font-medium">License Plate:</span> ${licensePlate}</li>
-                        <li><span class="font-medium">Last Service:</span> N/A</li>
-                        <li><span class="font-medium">Next Service:</span> N/A</li>
+                        <li><span class="font-medium">Make:</span> ${vehicle.make}</li>
+                        <li><span class="font-medium">Model:</span> ${vehicle.model}</li>
+                        <li><span class="font-medium">Year:</span> ${vehicle.year || 'N/A'}</li>
+                        <li><span class="font-medium">License Plate:</span> ${vehicle.licensePlate}</li>
+                        <li><span class="font-medium">Vehicle ID:</span> ${vehicle._id}</li>
                     </ul>
                 </div>
                 <div class="flex justify-end gap-2 mt-4">
-                    <button class="px-3 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors">
+                    <!-- Edit functionality can be added later -->
+                    <!-- <button class="px-3 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors">
                         <i class="ri-edit-line"></i> Edit
-                    </button>
-                    <button class="px-3 py-2 bg-red-500 text-white rounded-button text-sm hover:bg-red-600 transition-colors">
+                    </button> -->
+                    <button data-vehicle-id="${vehicle._id}" class="delete-vehicle-btn px-3 py-2 bg-red-500 text-white rounded-button text-sm hover:bg-red-600 transition-colors">
                         <i class="ri-delete-bin-line"></i> Delete
                     </button>
                 </div>
             </div>
         `;
-        vehiclesList.insertAdjacentHTML('beforeend', newVehicleCardHtml); // Add new card
-        
-        updateNoVehiclesMessage(); // Re-check visibility after adding a vehicle
+        return vehicleCardHtml;
+    }
 
-        addVehicleForm.reset(); // Clear the form
-        // Using a simple alert for demonstration. In a real application, consider a custom modal.
-        alert('Vehicle added successfully!'); 
+    // Function to fetch and display user's vehicles
+    async function fetchAndDisplayVehicles() {
+        const vehiclesList = document.getElementById('vehicles-list');
+        vehiclesList.innerHTML = ''; // Clear existing vehicles
+
+        const token = getToken();
+        if (!token) return; // Should be handled by checkAuthAndRedirect, but good defensive check
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/vehicles`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.length > 0) {
+                    data.forEach(vehicle => {
+                        vehiclesList.insertAdjacentHTML('beforeend', renderVehicleCard(vehicle));
+                    });
+                }
+            } else {
+                showMessage(data.msg || 'Failed to fetch vehicles.', 'error');
+            }
+        } catch (error) {
+            console.error('Error fetching vehicles:', error);
+            showMessage('Network error while fetching vehicles.', 'error');
+        } finally {
+            updateNoVehiclesMessage(); // Update message visibility after fetch attempt
+        }
+    }
+
+    // Function to render a single service history item
+    function renderServiceHistoryItem(service) {
+        const serviceDate = new Date(service.date).toLocaleDateString();
+        const serviceCost = service.cost ? `₹${service.cost.toFixed(2)}` : 'N/A';
+        const serviceStatusClass = `status-${service.type.toLowerCase().replace(/\s/g, '-')}`; // Map service type to status class for styling
+
+        // Check if vehicleId is populated
+        const vehicleInfo = service.vehicleId ?
+            `${service.vehicleId.make} ${service.vehicleId.model} (${service.vehicleId.licensePlate})` :
+            'Unknown Vehicle';
+
+        const serviceItemHtml = `
+            <div class="bg-gray-50 p-4 rounded-lg shadow-sm mb-4 flex justify-between items-center">
+                <div>
+                    <p class="font-medium text-gray-800">${vehicleInfo} - ${service.type}</p>
+                    <p class="text-sm text-gray-600">Service Date: ${serviceDate}</p>
+                    <p class="text-sm text-gray-600">Description: ${service.description || 'No description'}</p>
+                    <p class="text-sm text-gray-600">Cost: ${serviceCost}</p>
+                </div>
+                <!-- Assuming service type itself will be the status, adjust if backend has separate status field -->
+                <span class="px-3 py-1 text-sm font-medium rounded-full ${serviceStatusClass}">${service.type}</span>
+            </div>
+        `;
+        return serviceItemHtml;
+    }
+
+    // Function to fetch and display user's services (history)
+    async function fetchAndDisplayServices() {
+        const serviceHistoryList = document.getElementById('service-history-list');
+        serviceHistoryList.innerHTML = ''; // Clear existing services
+
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            const response = await fetch(`${BASE_URL}/api/services`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.length > 0) {
+                    // Sort services by date descending (most recent first)
+                    data.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                    // For current service status, pick the first (most recent) if desired.
+                    // For now, we'll just list all as history and mark the most recent one for current status display.
+                    const currentServiceStatusContainer = document.getElementById('current-service-status-container');
+                    const noCurrentServiceMessage = document.getElementById('no-current-service-message');
+
+                    currentServiceStatusContainer.classList.add('hidden'); // Hide if previously shown
+                    noCurrentServiceMessage.classList.remove('hidden'); // Show initially
+
+                    if (data.length > 0) {
+                        const latestService = data[0]; // Assuming the first item after sorting is the most recent
+                        const latestServiceDate = new Date(latestService.date).toLocaleDateString();
+                        const latestServiceStatusClass = `status-${latestService.type.toLowerCase().replace(/\s/g, '-')}`;
+                        const vehicleInfo = latestService.vehicleId ?
+                            `${latestService.vehicleId.make} ${latestService.vehicleId.model} (${latestService.vehicleId.licensePlate})` :
+                            'Unknown Vehicle';
+
+                        currentServiceStatusContainer.innerHTML = `
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Current Servicing Status</h3>
+                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 flex items-center space-x-4">
+                                <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-blue-700">
+                                    <i class="ri-dashboard-line text-2xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-gray-700 font-medium text-lg">Your ${vehicleInfo} Service:</p>
+                                    <span class="text-primary font-bold text-xl ${latestServiceStatusClass}">${latestService.type.replace(/-/g, ' ')}</span>
+                                    <span class="text-gray-500 text-sm ml-2">(Service Date: ${latestServiceDate})</span>
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">
+                                Status last updated: ${latestServiceDate}
+                            </div>
+                        `;
+                        currentServiceStatusContainer.classList.remove('hidden');
+                        noCurrentServiceMessage.classList.add('hidden'); // Hide if a current service is displayed
+
+                        data.forEach(service => {
+                            serviceHistoryList.insertAdjacentHTML('beforeend', renderServiceHistoryItem(service));
+                        });
+                    }
+                }
+            } else {
+                showMessage(data.msg || 'Failed to fetch service history.', 'error');
+            }
+        } catch (error) {
+            console.error('Error fetching services:', error);
+            showMessage('Network error while fetching services.', 'error');
+        } finally {
+            updateNoServiceHistoryMessage(); // Update message visibility after fetch attempt
+        }
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Redirect to login if not authenticated
+        if (!checkAuthAndRedirect()) {
+            return; // Stop execution if not authenticated
+        }
+
+        // Set user name from token (if available)
+        const token = getToken();
+        if (token) {
+            const decoded = decodeToken(token);
+            if (decoded && decoded.user && decoded.user.name) {
+                document.getElementById('user-name').textContent = decoded.user.name;
+            } else if (decoded && decoded.user && decoded.user.id) {
+                // If name is not in token, display user ID (or fetch profile data)
+                document.getElementById('user-name').textContent = decoded.user.id.substring(0, 8) + '...';
+            }
+        }
+
+
+        // Fetch and display data on page load
+        fetchAndDisplayVehicles();
+        fetchAndDisplayServices();
+
+        // Logout functionality
+        const logoutButton = document.getElementById('logout-button');
+        const logoutButtonMobile = document.getElementById('logout-button-mobile');
+
+        const performLogout = () => {
+            localStorage.removeItem('token'); // Remove JWT token
+            showMessage('Logged out successfully. Redirecting to home page.', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html'; // Redirect to index page
+            }, 1500);
+        };
+
+        if (logoutButton) {
+            logoutButton.addEventListener('click', performLogout);
+        }
+        if (logoutButtonMobile) {
+            logoutButtonMobile.addEventListener('click', performLogout);
+        }
+
+
+        // Show/Hide Add Vehicle Form
+        const showAddVehicleButton = document.getElementById('show-add-vehicle-form');
+        const addVehicleFormSection = document.getElementById('add-vehicle');
+        if (showAddVehicleButton && addVehicleFormSection) {
+            showAddVehicleButton.addEventListener('click', function() {
+                addVehicleFormSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                document.getElementById('vehicle-make').focus();
+            });
+        }
+
+        // Handle Add Vehicle Form Submission
+        const addVehicleForm = document.getElementById('add-vehicle-form');
+
+        addVehicleForm.addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const make = document.getElementById('vehicle-make').value.trim();
+            const model = document.getElementById('vehicle-model').value.trim();
+            const year = parseInt(document.getElementById('vehicle-year').value.trim()); // Parse year as number
+            const licensePlate = document.getElementById('license-plate').value.trim();
+
+            // Client-side validation
+            if (!make || !model || !year || !licensePlate) {
+                showMessage('Please fill in all vehicle details.', 'error');
+                return;
+            }
+            if (isNaN(year) || year < 1900 || year > 2099) {
+                showMessage('Please enter a valid year (e.g., 2020).', 'error');
+                return;
+            }
+
+            const token = getToken();
+            if (!token) {
+                showMessage('Authentication token missing. Please log in again.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/vehicles`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token // Include the JWT token
+                    },
+                    body: JSON.stringify({ make, model, year, licensePlate })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('Vehicle added successfully!', 'success');
+                    addVehicleForm.reset(); // Clear the form
+                    fetchAndDisplayVehicles(); // Refresh the list of vehicles
+                } else {
+                    showMessage(data.msg || 'Failed to add vehicle.', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding vehicle:', error);
+                showMessage('Network error while adding vehicle.', 'error');
+            }
+        });
+
+        // Handle Delete Vehicle Button Click (Event Delegation)
+        document.getElementById('vehicles-list').addEventListener('click', async function(event) {
+            const deleteButton = event.target.closest('.delete-vehicle-btn');
+            if (deleteButton) {
+                const vehicleId = deleteButton.dataset.vehicleId;
+
+                // Show custom confirmation modal
+                const confirmationModal = document.getElementById('confirmation-modal');
+                const confirmYes = document.getElementById('confirm-yes');
+                const confirmNo = document.getElementById('confirm-no');
+                const modalTitle = document.getElementById('confirmation-modal-title');
+                const modalMessage = document.getElementById('confirmation-modal-message');
+
+                modalTitle.textContent = 'Confirm Deletion';
+                modalMessage.textContent = 'Are you sure you want to delete this vehicle? This action cannot be undone.';
+                confirmationModal.classList.add('show');
+
+                // Use promises to wait for user's decision
+                const userConfirmed = await new Promise(resolve => {
+                    confirmYes.onclick = () => {
+                        confirmationModal.classList.remove('show');
+                        resolve(true);
+                    };
+                    confirmNo.onclick = () => {
+                        confirmationModal.classList.remove('show');
+                        resolve(false);
+                    };
+                });
+
+                if (!userConfirmed) {
+                    return; // User cancelled deletion
+                }
+
+                const token = getToken();
+                if (!token) {
+                    showMessage('Authentication token missing. Please log in again.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${BASE_URL}/api/vehicles/${vehicleId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'x-auth-token': token // Include the JWT token
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showMessage('Vehicle deleted successfully!', 'success');
+                        fetchAndDisplayVehicles(); // Refresh the list of vehicles
+                        fetchAndDisplayServices(); // Refresh services as a vehicle might be deleted
+                    } else {
+                        showMessage(data.msg || 'Failed to delete vehicle.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error deleting vehicle:', error);
+                    showMessage('Network error while deleting vehicle.', 'error');
+                }
+            }
+        });
+
     });
-});
 </script>
 
 <!-- Navbar Scroll Effect Script -->
