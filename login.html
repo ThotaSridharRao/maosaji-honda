@@ -124,7 +124,7 @@
             }
         }
 
-        /* Custom Message Box Styles (copied from signup.html for consistency) */
+        /* Custom Message Box Styles */
         .message-box {
             position: fixed;
             top: 20px;
@@ -217,6 +217,21 @@
                 setTimeout(() => msgBox.classList.add('hidden'), 500); // Hide after fade out
             }, 3000); // Message visible for 3 seconds
             msgBox.classList.remove('hidden'); // Ensure it's not hidden if re-shown quickly
+        }
+
+        // Function to decode JWT token and get user info
+        function decodeToken(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                console.error("Error decoding token:", error);
+                return null;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
