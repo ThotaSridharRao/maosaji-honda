@@ -167,7 +167,7 @@ input[type="number"]::-webkit-outer-spin-button {
     background-color: white;
     border-radius: 50%;
     transition: transform 0.3s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 1px 3px (0, 0, 0, 0.1);
 }
 .switch-active .switch-track {
     background-color: #3b82f6;
@@ -702,9 +702,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderServiceHistoryItem(service) {
         const serviceDate = new Date(service.date).toLocaleDateString();
         const serviceCost = service.cost ? `₹${service.cost.toFixed(2)}` : 'N/A';
-        const serviceStatusClass = `status-${service.type.toLowerCase().replace(/\s/g, '-')}`; // Map service type to status class for styling
+        // Ensure status class matches backend 'type' values (e.g., 'pending', 'in-progress')
+        const serviceStatusClass = `status-${service.type.toLowerCase().replace(/\s/g, '-')}`; 
 
-        // Check if vehicleId is populated
+        // Check if vehicleId is populated and access its properties
         const vehicleInfo = service.vehicleId ?
             `${service.vehicleId.make} ${service.vehicleId.model} (${service.vehicleId.licensePlate})` :
             'Unknown Vehicle';
@@ -714,11 +715,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div>
                     <p class="font-medium text-gray-800">${vehicleInfo} - ${service.type}</p>
                     <p class="text-sm text-gray-600">Service Date: ${serviceDate}</p>
-                    <p class="text-sm text-gray-600">Description: ${service.description || 'No description'}</p>
+                    <p class="text-sm text-gray-600">Description: ${service.description || 'No description provided'}</p>
                     <p class="text-sm text-gray-600">Cost: ${serviceCost}</p>
                 </div>
-                <!-- Assuming service type itself will be the status, adjust if backend has separate status field -->
-                <span class="px-3 py-1 text-sm font-medium rounded-full ${serviceStatusClass}">${service.type}</span>
+                <span class="px-3 py-1 text-sm font-medium rounded-full ${serviceStatusClass}">
+                    ${service.type.replace(/-/g, ' ')}
+                </span>
             </div>
         `;
         return serviceItemHtml;
@@ -744,49 +746,50 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (response.ok) {
+                const currentServiceStatusContainer = document.getElementById('current-service-status-container');
+                const noCurrentServiceMessage = document.getElementById('no-current-service-message');
+
+                currentServiceStatusContainer.classList.add('hidden'); // Hide if previously shown
+                noCurrentServiceMessage.classList.remove('hidden'); // Show initially
+
                 if (data.length > 0) {
                     // Sort services by date descending (most recent first)
                     data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-                    // For current service status, pick the first (most recent) if desired.
-                    // For now, we'll just list all as history and mark the most recent one for current status display.
-                    const currentServiceStatusContainer = document.getElementById('current-service-status-container');
-                    const noCurrentServiceMessage = document.getElementById('no-current-service-message');
+                    const latestService = data[0]; // The most recent service
+                    const latestServiceDate = new Date(latestService.date).toLocaleDateString();
+                    // Ensure status class matches backend 'type' values (e.g., 'pending', 'in-progress')
+                    const latestServiceStatusClass = `status-${latestService.type.toLowerCase().replace(/\s/g, '-')}`; 
+                    
+                    const vehicleInfoLatest = latestService.vehicleId ?
+                        `${latestService.vehicleId.make} ${latestService.vehicleId.model} (${latestService.vehicleId.licensePlate})` :
+                        'Unknown Vehicle';
 
-                    currentServiceStatusContainer.classList.add('hidden'); // Hide if previously shown
-                    noCurrentServiceMessage.classList.remove('hidden'); // Show initially
-
-                    if (data.length > 0) {
-                        const latestService = data[0]; // Assuming the first item after sorting is the most recent
-                        const latestServiceDate = new Date(latestService.date).toLocaleDateString();
-                        const latestServiceStatusClass = `status-${latestService.type.toLowerCase().replace(/\s/g, '-')}`;
-                        const vehicleInfo = latestService.vehicleId ?
-                            `${latestService.vehicleId.make} ${latestService.vehicleId.model} (${latestService.vehicleId.licensePlate})` :
-                            'Unknown Vehicle';
-
-                        currentServiceStatusContainer.innerHTML = `
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Current Servicing Status</h3>
-                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 flex items-center space-x-4">
-                                <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-blue-700">
-                                    <i class="ri-dashboard-line text-2xl"></i>
-                                </div>
-                                <div>
-                                    <p class="text-gray-700 font-medium text-lg">Your ${vehicleInfo} Service:</p>
-                                    <span class="text-primary font-bold text-xl ${latestServiceStatusClass}">${latestService.type.replace(/-/g, ' ')}</span>
-                                    <span class="text-gray-500 text-sm ml-2">(Service Date: ${latestServiceDate})</span>
-                                </div>
+                    // Display current service status
+                    currentServiceStatusContainer.innerHTML = `
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4">Current Servicing Status</h3>
+                        <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+                            <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 flex-shrink-0">
+                                <i class="ri-dashboard-line text-2xl"></i>
                             </div>
-                            <div class="text-sm text-gray-500 mt-2">
-                                Status last updated: ${latestServiceDate}
+                            <div class="flex-grow">
+                                <p class="text-gray-700 font-medium text-lg">Your ${vehicleInfoLatest} Service:</p>
+                                <span class="font-bold text-xl ${latestServiceStatusClass}">
+                                    ${latestService.type.replace(/-/g, ' ')}
+                                </span>
+                                <span class="text-gray-500 text-sm ml-2">(Service Date: ${latestServiceDate})</span>
+                                <p class="text-gray-600 text-sm mt-1">Details: ${latestService.description || 'No description provided'}</p>
+                                <p class="text-gray-600 text-sm">Estimated Cost: ${latestService.cost ? `₹${latestService.cost.toFixed(2)}` : 'N/A'}</p>
                             </div>
-                        `;
-                        currentServiceStatusContainer.classList.remove('hidden');
-                        noCurrentServiceMessage.classList.add('hidden'); // Hide if a current service is displayed
+                        </div>
+                    `;
+                    currentServiceStatusContainer.classList.remove('hidden');
+                    noCurrentServiceMessage.classList.add('hidden'); // Hide if a current service is displayed
 
-                        data.forEach(service => {
-                            serviceHistoryList.insertAdjacentHTML('beforeend', renderServiceHistoryItem(service));
-                        });
-                    }
+                    // Display all services as history
+                    data.forEach(service => {
+                        serviceHistoryList.insertAdjacentHTML('beforeend', renderServiceHistoryItem(service));
+                    });
                 }
             } else {
                 showMessage(data.msg || 'Failed to fetch service history.', 'error');
@@ -821,7 +824,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Fetch and display data on page load
         fetchAndDisplayVehicles();
-        fetchAndDisplayServices();
+        fetchAndDisplayServices(); // Ensure this is called to load services
 
         // Logout functionality
         const logoutButton = document.getElementById('logout-button');
@@ -896,6 +899,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     showMessage('Vehicle added successfully!', 'success');
                     addVehicleForm.reset(); // Clear the form
                     fetchAndDisplayVehicles(); // Refresh the list of vehicles
+                    fetchAndDisplayServices(); // Also refresh services as a new vehicle might get a service
                 } else {
                     showMessage(data.msg || 'Failed to add vehicle.', 'error');
                 }
