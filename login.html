@@ -123,9 +123,36 @@
                 max-height: 44px;
             }
         }
+
+        /* Custom Message Box Styles (copied from signup.html for consistency) */
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* Green for success */
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            min-width: 250px;
+            text-align: center;
+        }
+        .message-box.error {
+            background-color: #f44336; /* Red for error */
+        }
+        .message-box.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <!-- Custom Message Box Container -->
+    <div id="custom-message-box" class="message-box hidden"></div>
+
     <!-- Main container for the login form -->
     <div class="container relative w-full max-w-xl overflow-hidden rounded-2xl shadow-2xl bg-white">
         <!-- Sign In Form Wrapper -->
@@ -150,18 +177,18 @@
                 </div>
                 <p class="text-center text-sm text-gray-500 mb-6">or use your email account</p>
                 <!-- Sign In Form -->
-                <form>
+                <form id="login-form">
                     <div class="mb-4 relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="ri-mail-line text-gray-400"></i>
                         </div>
-                        <input type="email" class="form-input w-full pl-10 pr-3 py-3 rounded-button border border-gray-300 focus:outline-none" placeholder="Email" required>
+                        <input type="email" id="email" class="form-input w-full pl-10 pr-3 py-3 rounded-button border border-gray-300 focus:outline-none" placeholder="Email" required>
                     </div>
                     <div class="mb-4 relative">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="ri-lock-line text-gray-400"></i>
                         </div>
-                        <input type="password" class="form-input w-full pl-10 pr-3 py-3 rounded-button border border-gray-300 focus:outline-none" placeholder="Password" required>
+                        <input type="password" id="password" class="form-input w-full pl-10 pr-3 py-3 rounded-button border border-gray-300 focus:outline-none" placeholder="Password" required>
                     </div>
                     <div class="flex justify-end mb-4">
                         <a href="#" class="text-sm text-gray-600 hover:text-primary hover:underline">Forgot password?</a>
@@ -169,11 +196,91 @@
                     <button type="submit" class="w-full bg-primary text-white py-3 rounded-button font-medium hover:bg-opacity-90 transition-all !rounded-button whitespace-nowrap">Sign In</button>
                 </form>
                 <p class="text-center mt-6 text-gray-600">
-                    Don't have an account? 
+                    Don't have an account?
                     <a href="signup.html" class="text-primary hover:underline">Sign Up</a>
                 </p>
             </div>
         </div>
     </div>
+
+    <script>
+        // Define the base URL for your deployed backend
+        const BASE_URL = 'https://honda-backend-ezro.onrender.com'; // Replace with your actual Render URL
+
+        // Helper function to display custom messages (success/error)
+        function showMessage(message, type = 'success') {
+            const msgBox = document.getElementById('custom-message-box');
+            msgBox.textContent = message;
+            msgBox.className = `message-box show ${type}`; // Add 'show' and type class
+            setTimeout(() => {
+                msgBox.classList.remove('show');
+                setTimeout(() => msgBox.classList.add('hidden'), 500); // Hide after fade out
+            }, 3000); // Message visible for 3 seconds
+            msgBox.classList.remove('hidden'); // Ensure it's not hidden if re-shown quickly
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('login-form');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault(); // Prevent default form submission
+
+                    const email = emailInput.value.trim();
+                    const password = passwordInput.value.trim();
+
+                    // Basic client-side validation
+                    if (!email || !password) {
+                        showMessage('Please enter both email and password.', 'error');
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`${BASE_URL}/api/auth/login`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ email, password })
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) { // Check if response status is 2xx (success)
+                            // Store the JWT token securely (e.g., in localStorage)
+                            localStorage.setItem('token', data.token);
+                            showMessage('Login successful! Redirecting to dashboard.', 'success');
+
+                            // Determine redirection based on user type (isAdmin) from the token
+                            // You would need to decode the token on the client-side or
+                            // have the backend send isAdmin flag with the login response.
+                            // For simplicity, assuming backend sends isAdmin flag or we'll fetch profile later.
+                            // For now, we'll redirect all successful logins to user.html.
+                            // In a full app, you might decode the JWT here to check isAdmin:
+                            // const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
+                            // if (tokenPayload.user.isAdmin) {
+                            //     window.location.href = 'admin.html';
+                            // } else {
+                            //     window.location.href = 'user.html';
+                            // }
+
+                            // Redirect to user dashboard
+                            setTimeout(() => {
+                                window.location.href = 'user.html';
+                            }, 2000);
+                        } else {
+                            // Handle backend errors (e.g., invalid credentials)
+                            showMessage(data.msg || 'Login failed. Invalid credentials.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error during login:', error);
+                        showMessage('Network error. Please try again later.', 'error');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
