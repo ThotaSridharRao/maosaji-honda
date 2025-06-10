@@ -735,11 +735,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const currentServiceStatusContainer = document.getElementById('current-service-status-container');
         const noCurrentServiceMessage = document.getElementById('no-current-service-message');
+        const noServiceHistoryMessage = document.getElementById('no-service-history-message'); // Get reference
 
-        currentServiceStatusContainer.classList.add('hidden'); // Hide if previously shown
-        noCurrentServiceMessage.classList.remove('hidden'); // Show initially
+        currentServiceStatusContainer.classList.add('hidden'); // Hide current status initially
+        noCurrentServiceMessage.classList.remove('hidden'); // Show no current message initially
         serviceHistoryList.classList.add('hidden'); // Hide history initially
-        document.getElementById('no-service-history-message').classList.remove('hidden'); // Show no history message initially
+        noServiceHistoryMessage.classList.remove('hidden'); // Show no history message initially
 
 
         const token = getToken();
@@ -761,68 +762,72 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Sort services by date descending (most recent first)
                     data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-                    let hasCurrentService = false;
-                    const historyServices = []; // Array to store services for history
+                    let currentService = null;
+                    const historicalServices = []; // Array to store services for history
 
-                    // Iterate through all services to identify current and history services
+                    // Iterate through sorted services to identify the *single* most recent current service
+                    // and collect all other services (including picked-up ones) for history.
                     data.forEach(service => {
-                        if (service.type.toLowerCase() !== 'picked-up' && !hasCurrentService) {
-                            // This is the most recent non-picked-up service, treat as current
-                            hasCurrentService = true;
-                            const latestServiceDate = new Date(service.date).toLocaleDateString();
-                            const latestServiceStatusClass = `status-${service.type.toLowerCase().replace(/\s/g, '-')}`; 
-                            
-                            const vehicleInfoLatest = service.vehicleId ?
-                                `${service.vehicleId.make} ${service.vehicleId.model} (${service.vehicleId.licensePlate})` :
-                                'Unknown Vehicle';
-
-                            // Display current service status
-                            currentServiceStatusContainer.innerHTML = `
-                                <h3 class="text-xl font-semibold text-gray-800 mb-4">Current Servicing Status</h3>
-                                <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
-                                    <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 flex-shrink-0">
-                                        <i class="ri-dashboard-line text-2xl"></i>
-                                    </div>
-                                    <div class="flex-grow">
-                                        <p class="text-gray-700 font-medium text-lg">Your ${vehicleInfoLatest} Service:</p>
-                                        <span class="font-bold text-xl ${latestServiceStatusClass}">
-                                            ${service.type.replace(/-/g, ' ')}
-                                        </span>
-                                        <span class="text-gray-500 text-sm ml-2">(Service Date: ${latestServiceDate})</span>
-                                        <p class="text-gray-600 text-sm mt-1">Details: ${service.description || 'No description provided'}</p>
-                                        <p class="text-gray-600 text-sm">Estimated Cost: ${service.cost ? `₹${service.cost.toFixed(2)}` : 'N/A'}</p>
-                                    </div>
-                                </div>
-                            `;
-                            currentServiceStatusContainer.classList.remove('hidden');
-                            noCurrentServiceMessage.classList.add('hidden'); // Hide if a current service is displayed
+                        if (service.type.toLowerCase() !== 'picked-up' && !currentService) {
+                            // This is the most recent non-picked-up service for the "Current Status"
+                            currentService = service;
                         } else {
-                            // Add all other services to history
-                            historyServices.push(service);
+                            // All other services (including picked-up services, or older non-picked-up ones)
+                            // go into the historical list.
+                            historicalServices.push(service);
                         }
                     });
-                    
-                    if (!hasCurrentService) {
-                         noCurrentServiceMessage.classList.remove('hidden'); // Ensure message is visible if no current service
+
+                    // --- Display Current Service Status ---
+                    if (currentService) {
+                        const latestServiceDate = new Date(currentService.date).toLocaleDateString();
+                        const latestServiceStatusClass = `status-${currentService.type.toLowerCase().replace(/\s/g, '-')}`; 
+                        
+                        const vehicleInfoLatest = currentService.vehicleId ?
+                            `${currentService.vehicleId.make} ${currentService.vehicleId.model} (${currentService.vehicleId.licensePlate})` :
+                            'Unknown Vehicle';
+
+                        // Display current service status
+                        currentServiceStatusContainer.innerHTML = `
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Current Servicing Status</h3>
+                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
+                                <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 flex-shrink-0">
+                                    <i class="ri-dashboard-line text-2xl"></i>
+                                </div>
+                                <div class="flex-grow">
+                                    <p class="text-gray-700 font-medium text-lg">Your ${vehicleInfoLatest} Service:</p>
+                                    <span class="font-bold text-xl ${latestServiceStatusClass}">
+                                        ${currentService.type.replace(/-/g, ' ')}
+                                    </span>
+                                    <span class="text-gray-500 text-sm ml-2">(Service Date: ${latestServiceDate})</span>
+                                    <p class="text-gray-600 text-sm mt-1">Details: ${currentService.description || 'No description provided'}</p>
+                                    <p class="text-gray-600 text-sm">Estimated Cost: ${currentService.cost ? `₹${currentService.cost.toFixed(2)}` : 'N/A'}</p>
+                                </div>
+                            </div>
+                        `;
+                        currentServiceStatusContainer.classList.remove('hidden');
+                        noCurrentServiceMessage.classList.add('hidden'); // Hide no current message
+                    } else {
+                        // If no current service (i.e., all services are 'picked-up' or no services)
+                        noCurrentServiceMessage.classList.remove('hidden'); // Ensure no current message is visible
                     }
 
-
-                    // Display history services
-                    if (historyServices.length > 0) {
-                        historyServices.forEach(service => {
+                    // --- Display Servicing History ---
+                    if (historicalServices.length > 0) {
+                        historicalServices.forEach(service => {
                             serviceHistoryList.insertAdjacentHTML('beforeend', renderServiceHistoryItem(service));
                         });
                         serviceHistoryList.classList.remove('hidden');
-                        document.getElementById('no-service-history-message').classList.add('hidden');
+                        noServiceHistoryMessage.classList.add('hidden'); // Hide no history message
                     } else {
-                        serviceHistoryList.classList.add('hidden');
-                        document.getElementById('no-service-history-message').classList.remove('hidden');
+                        serviceHistoryList.classList.add('hidden'); // Ensure history list is hidden
+                        noServiceHistoryMessage.classList.remove('hidden'); // Show no history message
                     }
 
                 } else {
-                    // No services at all
+                    // No services at all (data.length is 0)
                     noCurrentServiceMessage.classList.remove('hidden');
-                    document.getElementById('no-service-history-message').classList.remove('hidden');
+                    noServiceHistoryMessage.classList.remove('hidden');
                 }
             } else {
                 showMessage(data.msg || 'Failed to fetch service history.', 'error');
@@ -831,9 +836,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error fetching services:', error);
             showMessage('Network error while fetching services.', 'error');
         } finally {
-            // Ensure messages are correctly displayed even if fetch fails
-            updateNoServiceHistoryMessage(); // This will be called, but the logic above manually controls visibility too
-            // updateNoCurrentServiceMessage(); // This is not needed as current service visibility is handled within the loop
+            // No need for updateNoServiceHistoryMessage here as visibility is handled within the main logic
         }
     }
 
@@ -885,7 +888,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const showAddVehicleButton = document.getElementById('show-add-vehicle-form');
         const addVehicleFormSection = document.getElementById('add-vehicle');
         if (showAddVehicleButton && addVehicleFormSection) {
-            showAddVehicleButton.addEventListener('click', function() {
+            showAddVehicleFormButton.addEventListener('click', function() {
                 addVehicleFormSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 document.getElementById('vehicle-make').focus();
             });
