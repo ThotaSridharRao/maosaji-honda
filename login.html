@@ -253,23 +253,18 @@
                             localStorage.setItem('token', data.token);
                             showMessage('Login successful! Redirecting to dashboard.', 'success');
 
-                            // Determine redirection based on user type (isAdmin) from the token
-                            // You would need to decode the token on the client-side or
-                            // have the backend send isAdmin flag with the login response.
-                            // For simplicity, assuming backend sends isAdmin flag or we'll fetch profile later.
-                            // For now, we'll redirect all successful logins to user.html.
-                            // In a full app, you might decode the JWT here to check isAdmin:
-                            // const tokenPayload = JSON.parse(atob(data.token.split('.')[1]));
-                            // if (tokenPayload.user.isAdmin) {
-                            //     window.location.href = 'admin.html';
-                            // } else {
-                            //     window.location.href = 'user.html';
-                            // }
-
-                            // Redirect to user dashboard
-                            setTimeout(() => {
-                                window.location.href = 'user.html';
-                            }, 2000);
+                            const decodedToken = decodeToken(data.token);
+                            if (decodedToken && decodedToken.user && decodedToken.user.isAdmin === true) {
+                                // Redirect to admin dashboard if user is admin
+                                setTimeout(() => {
+                                    window.location.href = 'admin.html';
+                                }, 2000);
+                            } else {
+                                // Redirect to user dashboard if not admin
+                                setTimeout(() => {
+                                    window.location.href = 'user.html';
+                                }, 2000);
+                            }
                         } else {
                             // Handle backend errors (e.g., invalid credentials)
                             showMessage(data.msg || 'Login failed. Invalid credentials.', 'error');
