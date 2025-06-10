@@ -12,7 +12,7 @@
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
 <script>tailwind.config={theme:{extend:{colors:{primary:'#e31837',secondary:'#000000'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
 <style>
-:where([class^="ri-"])::before { content: "\f3c2"; }
+:where([class^="ri-"])::before { content: initial; } /* Corrected: Remove default content to allow specific icon classes to work */
 body {
 font-family: 'Poppins', sans-serif;
 scroll-behavior: smooth;
@@ -173,13 +173,37 @@ height: 100%;
 background: linear-gradient(90deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.3) 100%);
 z-index: -1;
 }
+
+/* Custom Message Box Styles */
+.message-box {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #4CAF50; /* Green for success */
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    min-width: 250px;
+    text-align: center;
+}
+.message-box.error {
+    background-color: #f44336; /* Red for error */
+}
+.message-box.show {
+    opacity: 1;
+}
 </style>
 </head>
 <body>
 <!-- Loading Screen -->
 <div class="loading-screen" id="loading-screen">
 <div class="flex flex-col items-center">
-<div class="logo-pulse text-4xl font-['Pacifico'] text-primary mb-4">logo</div>
+<div class="logo-pulse text-4xl font-['Pacifico'] text-primary mb-4">Maosaji Honda</div>
 <div class="loader">
 <div class="loader-circle"></div>
 <div class="loader-circle"></div>
@@ -187,6 +211,10 @@ z-index: -1;
 <p class="mt-4 text-gray-600">Loading amazing service...</p>
 </div>
 </div>
+
+<!-- Custom Message Box Container -->
+<div id="custom-message-box" class="message-box hidden"></div>
+
 <!-- Navigation -->
 <nav class="bg-white shadow-md fixed w-full z-50 transition-all duration-300" id="navbar">
 <div class="container mx-auto px-4 py-3">
@@ -203,8 +231,10 @@ z-index: -1;
 <a href="#contact" class="text-gray-700 hover:text-primary transition-colors duration-300">Contact</a>
 </div>
 <div class="hidden md:flex items-center space-x-4">
-<button class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log In</button>
-<button class="px-4 py-2 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">Sign Up</button>
+    <!-- Updated Log In button to an anchor tag -->
+    <a href="login.html" class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log In</a>
+    <!-- Updated Sign Up button to an anchor tag -->
+    <a href="signup.html" class="px-4 py-2 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">Sign Up</a>
 </div>
 <div class="md:hidden flex items-center">
 <button id="mobile-menu-button" class="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-primary">
@@ -221,8 +251,10 @@ z-index: -1;
 <a href="#why-us" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Why Us</a>
 <a href="#contact" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Contact</a>
 <div class="flex space-x-4 pt-2">
-<button class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log In</button>
-<button class="px-4 py-2 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">Sign Up</button>
+    <!-- Updated Log In button to an anchor tag -->
+    <a href="login.html" class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log In</a>
+    <!-- Updated Sign Up button to an anchor tag -->
+    <a href="signup.html" class="px-4 py-2 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap">Sign Up</a>
 </div>
 </div>
 </div>
@@ -238,9 +270,9 @@ z-index: -1;
 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-gray-800">Authorized Honda <span class="text-primary">Motorcycle</span> Service Center</h1>
 <p class="text-lg md:text-xl text-gray-600 mb-8">Official Honda motorcycle maintenance and repair services by certified technicians using genuine Honda parts. Experience the excellence of authorized Honda servicing.</p>
 <div class="flex flex-col sm:flex-row gap-4">
-<button class="px-7 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap flex items-center justify-center" href="#contact">
+<a href="#contact" class="px-7 py-3 bg-primary text-white hover:bg-blue-600 transition-colors duration-300 !rounded-button whitespace-nowrap flex items-center justify-center">
 Get in touch
-</button>
+</a>
 <button class="px-6 py-3 border border-gray-300 text-gray-700 hover:border-primary hover:text-primary transition-colors duration-300 !rounded-button whitespace-nowrap flex items-center justify-center">
 <i class="ri-phone-line mr-2"></i> Call Now
 </button>
@@ -466,7 +498,7 @@ Get Updates
 <div class="w-full lg:w-1/2 fade-in">
 <div class="bg-white p-8 rounded-lg shadow-md">
 <h3 class="text-2xl font-semibold mb-6">Send Us a Message</h3>
-<form>
+<form id="contact-form-main"> <!-- Added ID to form -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 <div>
 <label for="name" class="block text-gray-700 mb-2">Full Name</label>
@@ -659,9 +691,9 @@ Schedule Call
 <div>
 <h4 class="text-lg font-semibold mb-6">Newsletter</h4>
 <p class="text-gray-400 mb-6">Subscribe to our newsletter for the latest service offers and automotive tips.</p>
-<form class="mb-4">
+<form id="newsletter-form-main" class="mb-4"> <!-- Added ID to form -->
 <div class="flex">
-<input type="email" placeholder="Your email address" class="px-4 py-3 bg-gray-700 text-white border-none rounded-l focus:outline-none focus:ring-2 focus:ring-primary flex-grow">
+<input type="email" placeholder="Your email address" class="px-4 py-3 bg-gray-700 text-white border-none rounded-l focus:outline-none focus:ring-2 focus:ring-primary flex-grow" id="newsletter-email">
 <button type="submit" class="px-4 py-3 bg-primary text-white rounded-r hover:bg-blue-600 transition-colors duration-300">
 <i class="ri-send-plane-fill"></i>
 </button>
@@ -737,44 +769,72 @@ window.addEventListener('scroll', checkFade);
 </script>
 <!-- Form Interaction Script -->
 <script id="form-interaction-script">
+// Helper function to display messages
+function showMessage(message, type = 'success') {
+    const msgBox = document.getElementById('custom-message-box');
+    msgBox.textContent = message;
+    msgBox.className = `message-box show ${type}`; // Add 'show' and type class
+    setTimeout(() => {
+        msgBox.classList.remove('show');
+        setTimeout(() => msgBox.classList.add('hidden'), 500); // Hide after fade out
+    }, 3000); // Message visible for 3 seconds
+    msgBox.classList.remove('hidden'); // Ensure it's not hidden if re-shown quickly
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-// Custom checkbox
-const consentCheckbox = document.getElementById('consent-checkbox');
-if (consentCheckbox) {
-consentCheckbox.addEventListener('click', function() {
-this.classList.toggle('checked');
-});
-}
-// Custom switch
-const newsletterSwitch = document.getElementById('newsletter-switch');
-if (newsletterSwitch) {
-newsletterSwitch.addEventListener('click', function() {
-this.classList.toggle('switch-active');
-});
-}
-// Form validation
-const contactForm = document.querySelector('#contact form');
-if (contactForm) {
-contactForm.addEventListener('submit', function(e) {
-e.preventDefault();
-// Simple validation example
-const nameInput = document.getElementById('name');
-const emailInput = document.getElementById('email');
-if (!nameInput.value.trim()) {
-alert('Please enter your name');
-nameInput.focus();
-return;
-}
-if (!emailInput.value.trim()) {
-alert('Please enter your email');
-emailInput.focus();
-return;
-}
-// If validation passes
-alert('Thank you for your message! We will contact you soon.');
-contactForm.reset();
-});
-}
+    // Custom checkbox
+    const consentCheckbox = document.getElementById('consent-checkbox');
+    if (consentCheckbox) {
+        consentCheckbox.addEventListener('click', function() {
+            this.classList.toggle('checked');
+        });
+    }
+    // Custom switch
+    const newsletterSwitch = document.getElementById('newsletter-switch');
+    if (newsletterSwitch) {
+        newsletterSwitch.addEventListener('click', function() {
+            this.classList.toggle('switch-active');
+        });
+    }
+    // Form validation and submission for Contact Form
+    const contactForm = document.getElementById('contact-form-main'); // Use new ID
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Simple validation example
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            if (!nameInput.value.trim()) {
+                showMessage('Please enter your name', 'error');
+                nameInput.focus();
+                return;
+            }
+            if (!emailInput.value.trim()) {
+                showMessage('Please enter your email', 'error');
+                emailInput.focus();
+                return;
+            }
+            // If validation passes
+            showMessage('Thank you for your message! We will contact you soon.', 'success');
+            contactForm.reset();
+        });
+    }
+
+    // Form validation and submission for Newsletter Form
+    const newsletterForm = document.getElementById('newsletter-form-main'); // Use new ID
+    if (newsletterForm) {
+        newsletterForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const newsletterEmailInput = document.getElementById('newsletter-email');
+            if (!newsletterEmailInput.value.trim()) {
+                showMessage('Please enter your email for newsletter subscription', 'error');
+                newsletterEmailInput.focus();
+                return;
+            }
+            showMessage('Thank you for subscribing to our newsletter!', 'success');
+            newsletterForm.reset();
+        });
+    }
 });
 </script>
 <!-- Navbar Scroll Effect Script -->
