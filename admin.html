@@ -112,6 +112,8 @@ body {
 .status-completed { background-color: #d1fae5; color: #065f46; } /* green-100, green-800 */
 .status-ready-for-pickup { background-color: #bae6fd; color: #0369a1; } /* lightblue-100, lightblue-800 */
 .status-cancelled { background-color: #fee2e2; color: #b91c1c; } /* red-100, red-700 */
+.status-picked-up { background-color: #e0f2f7; color: #00838f; } /* teal-100, teal-700, custom for picked-up */
+
 
 /* Styles for custom form elements (if needed, though not directly used in this version) */
 .custom-checkbox {
@@ -307,7 +309,7 @@ body {
         <!-- Vehicles for Servicing Section -->
         <section id="vehicles-for-servicing" class="py-12 bg-white rounded-lg shadow-md mb-12 fade-in">
             <div class="px-8 py-6 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-800">Vehicles for Servicing</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Vehicles Currently in Service</h2>
                 <button id="scroll-to-add-service" class="px-4 py-2 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all flex items-center">
                     <i class="ri-add-line mr-2"></i> Add New Entry
                 </button>
@@ -319,7 +321,7 @@ body {
             <div id="no-service-vehicles-message" class="p-8 text-center text-gray-500 hidden">
                 <i class="ri-check-double-line text-6xl mb-4"></i>
                 <p class="text-xl font-medium mb-4">No vehicles currently in service!</p>
-                <p>Add a new service entry to get started.</p>
+                <p>Add a new service entry or check "Recent Activity".</p>
             </div>
         </section>
 
@@ -351,8 +353,9 @@ body {
                         <input type="tel" id="customer-phone" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="+919876543210" required>
                     </div>
                     <div>
-                        <label for="service-type" class="block text-gray-700 mb-2">Service Type (Status)</label>
+                        <label for="service-type" class="block text-gray-700 mb-2">Service Type (Initial Status)</label>
                         <select id="service-type" class="w-full px-4 py-3 border border-gray-300 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-8">
+                            <option value="pending">Pending</option>
                             <option value="Oil Change">Oil Change</option>
                             <option value="Tire Rotation">Tire Rotation</option>
                             <option value="Brake Inspection">Brake Inspection</option>
@@ -379,15 +382,18 @@ body {
             </form>
         </section>
 
-        <!-- Recent Activity (Placeholder) -->
+        <!-- Recent Activity Section -->
         <section id="recent-activity" class="py-12 bg-white rounded-lg shadow-md mt-12 fade-in">
             <div class="px-8 py-6 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-800">Recent Activity</h2>
+                <h2 class="text-2xl font-bold text-gray-800">Recent Service Activity</h2>
             </div>
-            <div class="p-8 text-center text-gray-500">
+            <div id="recent-activity-list" class="p-8 space-y-4">
+                <!-- Recent activity items will be dynamically loaded here -->
+            </div>
+            <div id="no-recent-activity-message" class="p-8 text-center text-gray-500 hidden">
                 <i class="ri-history-line text-6xl mb-4"></i>
-                <p class="text-xl font-medium mb-4">Activity Log Coming Soon!</p>
-                <p>This section will display recent updates and actions taken on service entries.</p>
+                <p class="text-xl font-medium mb-4">No recent service activity!</p>
+                <p>New service entries or status updates will appear here.</p>
             </div>
         </section>
     </div>
@@ -608,14 +614,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Function to render a single service vehicle card for the admin dashboard
-    function renderServiceVehicleCard(service) {
-        // Ensure service.vehicleId and service.userId are populated as per backend
+    // Function to update the visibility of the "no recent activity" message
+    const updateNoRecentActivityMessage = () => {
+        const recentActivityList = document.getElementById('recent-activity-list');
+        const noRecentActivityMessage = document.getElementById('no-recent-activity-message');
+        if (recentActivityList.children.length === 0) {
+            noRecentActivityMessage.classList.remove('hidden');
+        } else {
+            noRecentActivityMessage.classList.add('hidden');
+        }
+    };
+
+
+    // Function to render a single service vehicle card for the admin dashboard (Current Services)
+    function renderCurrentServiceCard(service) {
         const make = service.vehicleId ? service.vehicleId.make : 'N/A';
         const model = service.vehicleId ? service.vehicleId.model : 'N/A';
         const licensePlate = service.vehicleId ? service.vehicleId.licensePlate : 'N/A';
-        const customerName = service.customerName || (service.userId ? service.userId.name : 'N/A');
-        const customerPhone = service.customerPhone || 'N/A'; // Assuming customerPhone is on the service object now
+        const customerName = service.customerName || (service.user && service.user.name ? service.user.name : 'N/A');
+        const customerPhone = service.customerPhone || 'N/A'; 
 
         const currentStatus = service.type.toLowerCase().replace(/\s/g, '-');
         const serviceStatusClass = `status-${currentStatus}`;
@@ -649,6 +666,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <option value="completed" ${currentStatus === 'completed' ? 'selected' : ''}>Completed</option>
                             <option value="ready-for-pickup" ${currentStatus === 'ready-for-pickup' ? 'selected' : ''}>Ready for Pickup</option>
                             <option value="cancelled" ${currentStatus === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                            <option value="picked-up" ${currentStatus === 'picked-up' ? 'selected' : ''}>Picked Up</option>
                         </select>
                         <button data-service-id="${service._id}" class="update-status-btn px-3 py-2 bg-primary text-white rounded-button text-sm hover:bg-opacity-90 transition-colors whitespace-nowrap">
                             Update
@@ -660,16 +678,83 @@ document.addEventListener('DOMContentLoaded', function() {
         return serviceCardHtml;
     }
 
-    // Function to fetch and display all services for admin
-    async function fetchAndDisplayAllServices() {
+    // Function to render a single recent activity item
+    function renderRecentActivityItem(service) {
+        const serviceDate = new Date(service.date).toLocaleDateString();
+        const make = service.vehicleId ? service.vehicleId.make : 'N/A';
+        const model = service.vehicleId ? service.vehicleId.model : 'N/A';
+        const licensePlate = service.vehicleId ? service.vehicleId.licensePlate : 'N/A';
+        const customerName = service.customerName || (service.user && service.user.name ? service.user.name : 'N/A');
+        const customerPhone = service.customerPhone || 'N/A'; 
+        const serviceType = service.type;
+        const serviceStatusClass = `status-${service.type.toLowerCase().replace(/\s/g, '-')}`;
+
+        const activityItemHtml = `
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+                <div class="flex items-center mb-2">
+                    <i class="ri-checkbox-circle-fill text-xl text-green-500 mr-2"></i>
+                    <p class="font-medium text-gray-800">
+                        <span class="capitalize ${serviceStatusClass}">${serviceType.replace(/-/g, ' ')}</span> for 
+                        <span class="font-semibold">${make} ${model} (${licensePlate})</span>
+                    </p>
+                </div>
+                <p class="text-sm text-gray-600 mb-1">Customer: ${customerName} (Phone: ${customerPhone})</p>
+                <p class="text-sm text-gray-600">Date: ${serviceDate}</p>
+            </div>
+        `;
+        return activityItemHtml;
+    }
+
+
+    // Function to fetch and display services for admin's "Vehicles Currently in Service"
+    async function fetchAndDisplayCurrentServices() {
         const serviceVehiclesList = document.getElementById('service-vehicles-list');
         serviceVehiclesList.innerHTML = ''; // Clear existing cards
 
         const token = getToken();
-        if (!token) return; // Should be handled by checkAdminAuthAndRedirect
+        if (!token) return;
 
         try {
-            const response = await fetch(`${BASE_URL}/api/services`, {
+            // Fetch services where type is NOT 'picked-up'
+            const response = await fetch(`${BASE_URL}/api/services?includePickedUp=false`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                if (data.length > 0) {
+                    data.sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date descending
+                    data.forEach(service => {
+                        serviceVehiclesList.insertAdjacentHTML('beforeend', renderCurrentServiceCard(service));
+                    });
+                }
+            } else {
+                showMessage(data.msg || 'Failed to fetch current services.', 'error');
+            }
+        } catch (error) {
+            console.error('Error fetching current services:', error);
+            showMessage('Network error while fetching current services.', 'error');
+        } finally {
+            updateNoServiceVehiclesMessage(); // Update message visibility
+        }
+    }
+
+    // Function to fetch and display services for admin's "Recent Activity"
+    async function fetchAndDisplayRecentActivity() {
+        const recentActivityList = document.getElementById('recent-activity-list');
+        recentActivityList.innerHTML = ''; // Clear existing items
+
+        const token = getToken();
+        if (!token) return;
+
+        try {
+            // Fetch ALL services (including picked-up ones) for recent activity
+            const response = await fetch(`${BASE_URL}/api/services?includePickedUp=true`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -683,18 +768,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.length > 0) {
                     // Sort services by date descending (most recent first)
                     data.sort((a, b) => new Date(b.date) - new Date(a.date));
-                    data.forEach(service => {
-                        serviceVehiclesList.insertAdjacentHTML('beforeend', renderServiceVehicleCard(service));
+                    data.slice(0, 10).forEach(service => { // Displaying last 10 activities
+                        recentActivityList.insertAdjacentHTML('beforeend', renderRecentActivityItem(service));
                     });
                 }
             } else {
-                showMessage(data.msg || 'Failed to fetch services.', 'error');
+                showMessage(data.msg || 'Failed to fetch recent activity.', 'error');
             }
         } catch (error) {
-            console.error('Error fetching services:', error);
-            showMessage('Network error while fetching services.', 'error');
+            console.error('Error fetching recent activity:', error);
+            showMessage('Network error while fetching recent activity.', 'error');
         } finally {
-            updateNoServiceVehiclesMessage(); // Update message visibility
+            updateNoRecentActivityMessage(); // Update message visibility
         }
     }
 
@@ -710,13 +795,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (token) {
             const decoded = decodeToken(token);
             if (decoded && decoded.user && decoded.user.name) {
-                // Assuming admin's name is also available in the token, otherwise 'Admin' is fine
                 // document.getElementById('admin-name').textContent = decoded.user.name;
             }
         }
 
-        // Fetch and display services on page load
-        fetchAndDisplayAllServices();
+        // Fetch and display services on page load for both sections
+        fetchAndDisplayCurrentServices();
+        fetchAndDisplayRecentActivity();
 
         // Logout functionality
         const logoutButton = document.getElementById('logout-button');
@@ -800,7 +885,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     showMessage(data.msg || 'Service entry added successfully!', 'success');
                     addServiceForm.reset();
-                    fetchAndDisplayAllServices(); // Refresh the list of services
+                    fetchAndDisplayCurrentServices(); // Refresh the list of current services
+                    fetchAndDisplayRecentActivity(); // Also refresh recent activity
                 } else {
                     showMessage(data.msg || 'Failed to add service entry.', 'error');
                 }
@@ -845,7 +931,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         statusSpan.textContent = newStatus.replace(/-/g, ' ');
                         statusSpan.dataset.currentStatus = newStatus;
                         showMessage(data.msg || `Status for service ID ${serviceId} updated to "${newStatus.replace(/-/g, ' ')}"!`, 'success');
-                        // No need to refresh all services, as only one status updated
+                        
+                        // If status is 'picked-up', refresh both lists to remove from current and add to recent
+                        if (newStatus === 'picked-up') {
+                            fetchAndDisplayCurrentServices();
+                            fetchAndDisplayRecentActivity();
+                        } else {
+                            // Otherwise, just refresh current services (and recent activity might update if order changes)
+                            fetchAndDisplayCurrentServices();
+                        }
+
                     } else {
                         showMessage(data.msg || 'Failed to update service status.', 'error');
                     }
