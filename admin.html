@@ -792,6 +792,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <li><span class="font-medium">Customer:</span> ${customerName}</li>
                         <li><span class="font-medium">Phone:</span> <a href="tel:${customerPhone}" class="text-blue-600 hover:underline">${customerPhone}</a></li>
                         <li><span class="font-medium">Service ID:</span> ${service._id}</li>
+                        <li><span class="font-medium">Description:</span> ${service.description || 'N/A'}</li>
                         <li><span class="font-medium">Est. Cost:</span> ₹${service.cost ? service.cost.toFixed(2) : '0.00'}</li>
                         <li><span class="font-medium">Total Bill:</span> ₹${service.totalBill ? service.totalBill.toFixed(2) : '0.00'}</li>
                     </ul>
