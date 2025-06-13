@@ -361,6 +361,18 @@ body {
                 </div>
             </div>
 
+            <!-- Added Customer Name and Phone to Edit Modal -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="edit-customer-name" class="block text-gray-700 mb-2">Customer Name</label>
+                    <input type="text" id="edit-customer-name" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                </div>
+                <div>
+                    <label for="edit-customer-phone" class="block text-gray-700 mb-2">Customer Phone</label>
+                    <input type="tel" id="edit-customer-phone" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                </div>
+            </div>
+
             <div class="mb-6">
                 <label for="edit-service-description" class="block text-gray-700 mb-2">Description</label>
                 <textarea id="edit-service-description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
@@ -1151,6 +1163,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Format date toYYYY-MM-DD for input type="date"
                     document.getElementById('edit-service-date').value = serviceToEdit.date ? new Date(serviceToEdit.date).toISOString().split('T')[0] : '';
                     document.getElementById('edit-service-type').value = serviceToEdit.type;
+                    document.getElementById('edit-customer-name').value = serviceToEdit.customerName || ''; // Populate customer name
+                    document.getElementById('edit-customer-phone').value = serviceToEdit.customerPhone || ''; // Populate customer phone
                     document.getElementById('edit-service-description').value = serviceToEdit.description || '';
                     document.getElementById('edit-service-cost').value = serviceToEdit.cost !== undefined ? serviceToEdit.cost : '';
                     document.getElementById('edit-total-bill').value = serviceToEdit.totalBill !== undefined ? serviceToEdit.totalBill : '';
@@ -1191,6 +1205,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const serviceId = document.getElementById('edit-service-id').value;
             const date = document.getElementById('edit-service-date').value;
             const type = document.getElementById('edit-service-type').value;
+            const customerName = document.getElementById('edit-customer-name').value.trim(); // Get customer name
+            const customerPhone = document.getElementById('edit-customer-phone').value.trim(); // Get customer phone
             const description = document.getElementById('edit-service-description').value.trim();
             const cost = parseFloat(document.getElementById('edit-service-cost').value.trim());
             const totalBill = parseFloat(document.getElementById('edit-total-bill').value.trim());
@@ -1237,6 +1253,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify({
                         date,
                         type,
+                        customerName, // Send customer name
+                        customerPhone, // Send customer phone
                         description,
                         cost,
                         partsUsed: parts, // Send the collected parts array
