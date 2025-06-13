@@ -99,82 +99,22 @@ body {
     opacity: 1;
     transform: translateY(0);
 }
-.vehicle-card {
+.vehicle-card, .service-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.vehicle-card:hover {
+.vehicle-card:hover, .service-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
-.vehicle-icon {
-    transition: transform 0.3s ease;
-}
-.vehicle-card:hover .vehicle-icon {
-    transform: scale(1.1);
-}
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-.custom-checkbox {
-    position: relative;
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background-color: #fff;
-    border: 2px solid #d1d5db;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-.custom-checkbox.checked {
-    background-color: #3b82f6;
-    border-color: #3b82f6;
-}
-.custom-checkbox.checked::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 6px;
-    width: 6px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-.custom-switch {
-    position: relative;
-    display: inline-block;
-    width: 48px;
-    height: 24px;
-}
-.switch-track {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #e5e7eb;
-    border-radius: 24px;
-    transition: background-color 0.3s ease;
-}
-.switch-thumb {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 20px;
-    height: 20px;
-    background-color: white;
-    border-radius: 50%;
-    transition: transform 0.3s ease;
-    box-shadow: 0 1px 3px (0, 0, 0, 0.1);
-}
-.switch-active .switch-track {
-    background-color: #3b82f6;
-}
-.switch-active .switch-thumb {
-    transform: translateX(24px);
-}
+/* Status colors for services */
+.status-pending { background-color: #fef3c7; color: #d97706; } /* yellow-100, yellow-700 */
+.status-in-progress { background-color: #bfdbfe; color: #1d4ed8; } /* blue-200, blue-800 */
+.status-completed { background-color: #d1fae5; color: #065f46; } /* green-100, green-800 */
+.status-ready-for-pickup { background-color: #bae6fd; color: #0369a1; } /* lightblue-100, lightblue-800 */
+.status-cancelled { background-color: #fee2e2; color: #b91c1c; } /* red-100, red-700 */
+.status-picked-up { background-color: #e0f2f7; color: #00838f; } /* teal-100, teal-700, custom for picked-up */
+
+
 /* Custom Message Box Styles */
 .message-box {
     position: fixed;
@@ -198,15 +138,6 @@ input[type="number"]::-webkit-outer-spin-button {
 .message-box.show {
     opacity: 1;
 }
-
-/* Status colors for services */
-.status-pending { background-color: #fef3c7; color: #d97706; } /* yellow-100, yellow-700 */
-.status-in-progress { background-color: #bfdbfe; color: #1d4ed8; } /* blue-200, blue-800 */
-.status-completed { background-color: #d1fae5; color: #065f46; } /* green-100, green-800 */
-.status-ready-for-pickup { background-color: #bae6fd; color: #0369a1; } /* lightblue-100, lightblue-800 */
-.status-cancelled { background-color: #fee2e2; color: #b91c1c; } /* red-100, red-700 */
-.status-picked-up { background-color: #e0f2f7; color: #00838f; } /* teal-100, teal-700, custom for picked-up */
-
 
 /* Confirmation Modal Styles */
 .confirmation-modal {
@@ -242,6 +173,56 @@ input[type="number"]::-webkit-outer-spin-button {
 .confirmation-modal.show .confirmation-modal-content {
     transform: translateY(0);
 }
+
+/* Modal for viewing service details (for user) */
+.view-service-details-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10002;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+.view-service-details-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+.view-service-details-modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 95%;
+    max-height: 90%;
+    overflow-y: auto; /* Enable scrolling for content if it overflows */
+    transform: translateY(20px);
+    transition: transform 0.3s ease-in-out;
+}
+.view-service-details-modal.show .view-service-details-modal-content {
+    transform: translateY(0);
+}
+.view-service-details-modal-content ul li {
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #e5e7eb;
+}
+.view-service-details-modal-content ul li:last-child {
+    border-bottom: none;
+}
+.view-service-details-modal-content .part-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+}
+
+
 </style>
 </head>
 <body>
@@ -253,7 +234,7 @@ input[type="number"]::-webkit-outer-spin-button {
             <div class="loader-circle"></div>
             <div class="loader-circle"></div>
         </div>
-        <p class="mt-4 text-gray-600">Loading your dashboard...</p>
+        <p class="mt-4 text-gray-600">Loading user dashboard...</p>
     </div>
 </div>
 
@@ -272,6 +253,33 @@ input[type="number"]::-webkit-outer-spin-button {
     </div>
 </div>
 
+<!-- View Service Details Modal (for user) -->
+<div id="view-service-details-modal" class="view-service-details-modal">
+    <div class="view-service-details-modal-content">
+        <h3 class="text-2xl font-bold mb-6 text-gray-800">Service Details</h3>
+        <div id="service-details-content" class="text-gray-700 text-left">
+            <ul class="space-y-2 mb-6">
+                <li><span class="font-semibold">Vehicle:</span> <span id="detail-vehicle"></span></li>
+                <li><span class="font-semibold">License Plate:</span> <span id="detail-license-plate"></span></li>
+                <li><span class="font-semibold">Service Date:</span> <span id="detail-date"></span></li>
+                <li><span class="font-semibold">Status:</span> <span id="detail-status"></span></li>
+                <li><span class="font-semibold">Description:</span> <span id="detail-description"></span></li>
+                <li><span class="font-semibold">Estimated Cost:</span> <span id="detail-estimated-cost"></span></li>
+                <li><span class="font-semibold">Total Bill:</span> <span id="detail-total-bill"></span></li>
+            </ul>
+            <h4 class="text-lg font-semibold mb-3 text-gray-800">Parts Used</h4>
+            <div id="detail-parts-used" class="bg-gray-50 p-4 rounded-lg">
+                <!-- Parts will be dynamically loaded here -->
+                <p id="no-parts-message" class="text-gray-500 text-sm italic hidden">No parts listed.</p>
+            </div>
+            <button type="button" id="close-service-details-btn" class="mt-8 px-6 py-3 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all w-full">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+
 <!-- Navigation (Header) -->
 <nav class="bg-white shadow-md fixed w-full z-50 transition-all duration-300" id="navbar">
     <div class="container mx-auto px-4 py-3">
@@ -281,12 +289,10 @@ input[type="number"]::-webkit-outer-spin-button {
                 <a href="#" class="text-2xl font-bold text-primary">Maosaji Honda</a>
             </div>
             <div class="hidden md:flex items-center space-x-8">
-              <a href="index.html" class="text-gray-700 hover:text-primary transition-colors duration-300">Home</a>
+                <a href="#welcome" class="text-gray-700 hover:text-primary transition-colors duration-300">Welcome</a>
                 <a href="#my-vehicles" class="text-gray-700 hover:text-primary transition-colors duration-300">My Vehicles</a>
-                <a href="#add-vehicle" class="text-gray-700 hover:text-primary transition-colors duration-300">Add Vehicle</a>
                 <a href="#book-service" class="text-gray-700 hover:text-primary transition-colors duration-300">Book Service</a>
                 <a href="#my-services" class="text-gray-700 hover:text-primary transition-colors duration-300">My Services</a>
-                <a href="#profile" class="text-gray-700 hover:text-primary transition-colors duration-300">Profile</a>
                 <button id="logout-button" class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log Out</button>
             </div>
             <div class="md:hidden flex items-center">
@@ -298,12 +304,10 @@ input[type="number"]::-webkit-outer-spin-button {
         <!-- Mobile Menu -->
         <div id="mobile-menu" class="md:hidden hidden mt-4 pb-2">
             <div class="flex flex-col space-y-3">
-              <a href="index.html" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Home</a>
+                <a href="#welcome" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Welcome</a>
                 <a href="#my-vehicles" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">My Vehicles</a>
-                <a href="#add-vehicle" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Add Vehicle</a>
                 <a href="#book-service" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Book Service</a>
                 <a href="#my-services" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">My Services</a>
-                <a href="#profile" class="text-gray-700 hover:text-primary py-2 transition-colors duration-300">Profile</a>
                 <button id="logout-button-mobile" class="px-4 py-2 text-primary border border-primary hover:bg-primary hover:text-white transition-colors duration-300 !rounded-button whitespace-nowrap">Log Out</button>
             </div>
         </div>
@@ -314,73 +318,72 @@ input[type="number"]::-webkit-outer-spin-button {
 <main class="pt-24 pb-12 bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4">
         <!-- Welcome Section -->
-        <section class="mb-12 fade-in">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Welcome, <span id="user-name">User</span>!</h1>
-            <p class="text-lg text-gray-600">Manage your vehicles and services efficiently.</p>
+        <section id="welcome" class="mb-12 fade-in">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Welcome, <span id="user-name" class="text-primary">User</span>!</h1>
+            <p class="text-lg text-gray-600">Manage your vehicles and service appointments.</p>
         </section>
 
         <!-- My Vehicles Section -->
         <section id="my-vehicles" class="py-12 bg-white rounded-lg shadow-md mb-12 fade-in">
             <div class="px-8 py-6 border-b border-gray-200 flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-800">My Motorcycles</h2>
-                <button id="show-add-vehicle-form" class="px-4 py-2 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all flex items-center">
+                <h2 class="text-2xl font-bold text-gray-800">My Vehicles</h2>
+                <button id="open-add-vehicle-modal" class="px-4 py-2 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all flex items-center">
                     <i class="ri-add-line mr-2"></i> Add New Vehicle
                 </button>
             </div>
-            <div id="vehicles-list" class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div id="vehicle-list" class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Vehicle cards will be dynamically loaded here -->
             </div>
             <!-- Message for no vehicles -->
             <div id="no-vehicles-message" class="p-8 text-center text-gray-500 hidden">
-                <i class="ri-emotion-normal-line text-6xl mb-4"></i>
+                <i class="ri-car-line text-6xl mb-4"></i>
                 <p class="text-xl font-medium mb-4">No vehicles added yet!</p>
-                <p>Click "Add New Vehicle" to get started.</p>
+                <p>Add your motorcycle to get started with service bookings.</p>
             </div>
         </section>
 
-        <!-- Add New Vehicle Section -->
-        <section id="add-vehicle" class="py-12 bg-white rounded-lg shadow-md fade-in">
-            <div class="px-8 py-6 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-800">Add New Motorcycle</h2>
+        <!-- Add Vehicle Modal -->
+        <div id="add-vehicle-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-8 rounded-lg shadow-lg w-11/12 max-w-md">
+                <h3 class="text-2xl font-bold mb-6 text-gray-800">Add New Vehicle</h3>
+                <form id="add-vehicle-form">
+                    <div class="mb-4">
+                        <label for="make" class="block text-gray-700 mb-2">Make</label>
+                        <input type="text" id="make" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Honda" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="model" class="block text-gray-700 mb-2">Model</label>
+                        <input type="text" id="model" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Activa 6G" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="year" class="block text-gray-700 mb-2">Year</label>
+                        <input type="number" id="year" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="2020" min="1900" max="2099" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="licensePlate" class="block text-gray-700 mb-2">License Plate</label>
+                        <input type="text" id="licensePlate" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="UP65CD5678" required>
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="cancel-add-vehicle" class="px-6 py-3 bg-gray-300 text-gray-800 rounded-button font-medium hover:bg-gray-400 transition-colors">Cancel</button>
+                        <button type="submit" class="px-6 py-3 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all">Add Vehicle</button>
+                    </div>
+                </form>
             </div>
-            <form id="add-vehicle-form" class="p-8">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="vehicle-make" class="block text-gray-700 mb-2">Make</label>
-                        <input type="text" id="vehicle-make" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Honda" required>
-                    </div>
-                    <div>
-                        <label for="vehicle-model" class="block text-gray-700 mb-2">Model</label>
-                        <input type="text" id="vehicle-model" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="CBR600RR" required>
-                    </div>
-                    <div>
-                        <label for="vehicle-year" class="block text-gray-700 mb-2">Year</label>
-                        <input type="number" id="vehicle-year" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="2020" required min="1900" max="2099">
-                    </div>
-                    <div>
-                        <label for="license-plate" class="block text-gray-700 mb-2">License Plate</label>
-                        <input type="text" id="license-plate" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="KA01AB1234" required>
-                    </div>
-                </div>
-                <button type="submit" class="px-6 py-3 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all flex items-center justify-center">
-                    <i class="ri-save-line mr-2"></i> Save Vehicle
-                </button>
-            </form>
-        </section>
+        </div>
 
-        <!-- Book a Service Section -->
-        <section id="book-service" class="py-12 bg-white rounded-lg shadow-md mt-12 fade-in">
+        <!-- Book Service Section -->
+        <section id="book-service" class="py-12 bg-white rounded-lg shadow-md mb-12 fade-in">
             <div class="px-8 py-6 border-b border-gray-200">
                 <h2 class="text-2xl font-bold text-gray-800">Book a Service</h2>
             </div>
             <form id="book-service-form" class="p-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                        <label for="service-vehicle" class="block text-gray-700 mb-2">Select Vehicle</label>
+                        <label for="select-vehicle" class="block text-gray-700 mb-2">Select Your Vehicle</label>
                         <div class="relative">
-                            <select id="service-vehicle" class="w-full px-4 py-3 border border-gray-300 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-8" required>
-                                <option value="" disabled selected>Choose your motorcycle</option>
-                                <!-- Vehicles will be loaded here by JavaScript -->
+                            <select id="select-vehicle" class="w-full px-4 py-3 border border-gray-300 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-8" required>
+                                <option value="" disabled selected>-- Select a vehicle --</option>
+                                <!-- Vehicles will be dynamically loaded here -->
                             </select>
                             <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                                 <i class="ri-arrow-down-s-line text-gray-400"></i>
@@ -388,10 +391,14 @@ input[type="number"]::-webkit-outer-spin-button {
                         </div>
                     </div>
                     <div>
+                        <label for="service-date" class="block text-gray-700 mb-2">Preferred Date</label>
+                        <input type="date" id="service-date" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                    </div>
+                    <div>
                         <label for="service-type" class="block text-gray-700 mb-2">Service Type</label>
                         <div class="relative">
                             <select id="service-type" class="w-full px-4 py-3 border border-gray-300 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-8" required>
-                                <option value="" disabled selected>Select type of service</option>
+                                <option value="" disabled selected>-- Select service type --</option>
                                 <option value="Oil Change">Oil Change</option>
                                 <option value="Tire Rotation">Tire Rotation</option>
                                 <option value="Brake Inspection">Brake Inspection</option>
@@ -405,62 +412,29 @@ input[type="number"]::-webkit-outer-spin-button {
                         </div>
                     </div>
                     <div>
-                        <label for="service-date" class="block text-gray-700 mb-2">Preferred Date</label>
-                        <input type="date" id="service-date" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" required>
+                        <label for="service-description" class="block text-gray-700 mb-2">Describe the Issue (Optional)</label>
+                        <textarea id="service-description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="e.g., 'Brakes making a squealing noise', 'Engine light is on'"></textarea>
                     </div>
                 </div>
-                <div class="mb-6">
-                    <label for="service-description" class="block text-gray-700 mb-2">Service Description (Optional)</label>
-                    <textarea id="service-description" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Briefly describe the issue or service required..."></textarea>
-                </div>
                 <button type="submit" class="px-6 py-3 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all flex items-center justify-center">
-                    <i class="ri-calendar-check-line mr-2"></i> Request Service
+                    <i class="ri-calendar-check-line mr-2"></i> Book Service
                 </button>
             </form>
         </section>
 
         <!-- My Services Section -->
-        <section id="my-services" class="py-12 bg-white rounded-lg shadow-md mt-12 fade-in">
+        <section id="my-services" class="py-12 bg-white rounded-lg shadow-md fade-in">
             <div class="px-8 py-6 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-800">My Services</h2>
+                <h2 class="text-2xl font-bold text-gray-800">My Service History & Status</h2>
             </div>
-            <div class="p-8">
-                <!-- Current Servicing Status - Dynamically loaded -->
-                <div id="current-service-status-container" class="mb-8 hidden">
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Current Servicing Status</h3>
-                    <!-- Dynamic content will go here -->
-                </div>
-                <!-- Message for no current service -->
-                <div id="no-current-service-message" class="p-4 text-center text-gray-500">
-                    <i class="ri-information-line text-5xl mb-3"></i>
-                    <p class="text-md font-medium">No vehicle currently in service.</p>
-                </div>
-
-
-                <!-- Servicing History - Dynamically loaded -->
-                <div>
-                    <h3 class="text-xl font-semibold text-gray-800 mb-4">Servicing History</h3>
-                    <div id="service-history-list">
-                        <!-- Service history items will be dynamically loaded here -->
-                    </div>
-                    <!-- Message for no service history -->
-                    <div id="no-service-history-message" class="p-4 text-center text-gray-500 hidden">
-                        <i class="ri-file-text-line text-5xl mb-3"></i>
-                        <p class="text-md font-medium">No service history found.</p>
-                    </div>
-                </div>
+            <div id="service-history-list" class="p-8 space-y-4">
+                <!-- Service history items will be dynamically loaded here -->
             </div>
-        </section>
-
-        <!-- Profile Section (Placeholder - could be expanded later) -->
-        <section id="profile" class="py-12 bg-white rounded-lg shadow-md mt-12 fade-in">
-            <div class="px-8 py-6 border-b border-gray-200">
-                <h2 class="text-2xl font-bold text-gray-800">My Profile</h2>
-            </div>
-            <div class="p-8 text-center text-gray-500">
-                <i class="ri-user-settings-line text-6xl mb-4"></i>
-                <p class="text-xl font-medium mb-4">Profile Management Under Construction</p>
-                <p>Soon you'll be able to update your personal details and preferences here.</p>
+            <!-- Message for no service history -->
+            <div id="no-service-history-message" class="p-8 text-center text-gray-500 hidden">
+                <i class="ri-tools-line text-6xl mb-4"></i>
+                <p class="text-xl font-medium mb-4">No service history yet!</p>
+                <p>Book your first service appointment above.</p>
             </div>
         </section>
     </div>
@@ -498,7 +472,7 @@ input[type="number"]::-webkit-outer-spin-button {
                     <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
                         <i class="ri-twitter-fill"></i>
                     </a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify- Regulat justify-center">
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify- center">
                         <i class="ri-instagram-line"></i>
                     </a>
                     <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
@@ -510,11 +484,10 @@ input[type="number"]::-webkit-outer-spin-button {
             <div>
                 <h4 class="text-lg font-semibold mb-6">Quick Links</h4>
                 <ul class="space-y-3">
+                    <li><a href="#welcome" class="text-gray-400 hover:text-white transition-colors duration-300">Welcome</a></li>
                     <li><a href="#my-vehicles" class="text-gray-400 hover:text-white transition-colors duration-300">My Vehicles</a></li>
-                    <li><a href="#add-vehicle" class="text-gray-400 hover:text-white transition-colors duration-300">Add Vehicle</a></li>
                     <li><a href="#book-service" class="text-gray-400 hover:text-white transition-colors duration-300">Book Service</a></li>
                     <li><a href="#my-services" class="text-gray-400 hover:text-white transition-colors duration-300">My Services</a></li>
-                    <li><a href="#profile" class="text-gray-400 hover:text-white transition-colors duration-300">Profile</a></li>
                 </ul>
             </div>
             <!-- Services (Can link to specific dashboard sections or external service pages) -->
@@ -613,12 +586,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Dashboard Specific Scripts -->
-<script id="dashboard-script">
+<!-- User Dashboard Specific Scripts -->
+<script id="user-dashboard-script">
     // Define the base URL for your deployed backend
     const BASE_URL = 'https://honda-backend-ezro.onrender.com'; // Replace with your actual Render URL
-
-    let userVehicles = []; // Store user vehicles globally for use in service booking form
 
     // Helper function to display custom messages (success/error)
     function showMessage(message, type = 'success') {
@@ -652,14 +623,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Function to check authentication and redirect if no token
-    function checkAuthAndRedirect() {
+    // Function to check authentication and redirect if not authenticated
+    async function checkAuthAndRedirect() {
         const token = getToken();
         if (!token) {
             showMessage('You are not logged in. Redirecting to login page.', 'error');
             setTimeout(() => {
                 window.location.href = 'login.html';
-            }, 1500); // Redirect after 1.5 seconds
+            }, 1500);
             return false;
         }
         return true;
@@ -667,9 +638,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to update the visibility of the "no vehicles" message
     const updateNoVehiclesMessage = () => {
-        const vehiclesList = document.getElementById('vehicles-list');
+        const vehicleList = document.getElementById('vehicle-list');
         const noVehiclesMessage = document.getElementById('no-vehicles-message');
-        if (vehiclesList.children.length === 0) {
+        if (vehicleList.children.length === 0) {
             noVehiclesMessage.classList.remove('hidden');
         } else {
             noVehiclesMessage.classList.add('hidden');
@@ -690,46 +661,78 @@ document.addEventListener('DOMContentLoaded', function() {
     // Function to render a single vehicle card
     function renderVehicleCard(vehicle) {
         const vehicleCardHtml = `
-            <div class="vehicle-card bg-gray-50 p-6 rounded-lg shadow-sm flex flex-col justify-between">
+            <div class="vehicle-card bg-white p-6 rounded-lg shadow-sm flex flex-col justify-between">
                 <div>
                     <div class="flex items-center mb-4">
-                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4 vehicle-icon">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
                             <i class="ri-motorcycle-line ri-xl text-primary"></i>
                         </div>
                         <h3 class="text-xl font-semibold text-gray-800">${vehicle.make} ${vehicle.model}</h3>
                     </div>
                     <ul class="text-gray-600 space-y-2 text-sm">
-                        <li><span class="font-medium">Make:</span> ${vehicle.make}</li>
-                        <li><span class="font-medium">Model:</span> ${vehicle.model}</li>
-                        <li><span class="font-medium">Year:</span> ${vehicle.year || 'N/A'}</li>
+                        <li><span class="font-medium">Year:</span> ${vehicle.year}</li>
                         <li><span class="font-medium">License Plate:</span> ${vehicle.licensePlate}</li>
-                        <li><span class="font-medium">Vehicle ID:</span> ${vehicle._id}</li>
                     </ul>
                 </div>
-                <div class="flex justify-end gap-2 mt-4">
-                    <!-- Edit functionality can be added later -->
-                    <!-- <button class="px-3 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors">
-                        <i class="ri-edit-line"></i> Edit
-                    </button> -->
-                    <button data-vehicle-id="${vehicle._id}" class="delete-vehicle-btn px-3 py-2 bg-red-500 text-white rounded-button text-sm hover:bg-red-600 transition-colors">
-                        <i class="ri-delete-bin-line"></i> Delete
-                    </button>
-                </div>
+                <button data-vehicle-id="${vehicle._id}" class="delete-vehicle-btn mt-6 px-4 py-2 bg-red-500 text-white rounded-button text-sm hover:bg-red-600 transition-colors flex items-center justify-center">
+                    <i class="ri-delete-bin-line mr-2"></i> Delete Vehicle
+                </button>
             </div>
         `;
         return vehicleCardHtml;
     }
 
-    // Function to fetch and display user's vehicles AND populate the service booking dropdown
-    async function fetchAndDisplayVehicles() {
-        const vehiclesList = document.getElementById('vehicles-list');
-        vehiclesList.innerHTML = ''; // Clear existing vehicles
+    // Function to render a single service history item
+    function renderServiceHistoryItem(service) {
+        const serviceDate = new Date(service.date).toLocaleDateString();
+        const make = service.vehicleId ? service.vehicleId.make : 'N/A';
+        const model = service.vehicleId ? service.vehicleId.model : 'N/A';
+        const licensePlate = service.vehicleId ? service.vehicleId.licensePlate : 'N/A';
+        const serviceType = service.type;
+        const serviceStatusClass = `status-${service.type.toLowerCase().replace(/\s/g, '-')}`;
+        const totalBill = service.totalBill ? `₹${service.totalBill.toFixed(2)}` : 'N/A';
 
-        const serviceVehicleSelect = document.getElementById('service-vehicle');
-        serviceVehicleSelect.innerHTML = '<option value="" disabled selected>Choose your motorcycle</option>'; // Clear existing options and reset default
+        let partsListHtml = '';
+        if (service.partsUsed && service.partsUsed.length > 0) {
+            partsListHtml = `
+                <p class="text-sm text-gray-700 font-medium mt-2">Parts Used:</p>
+                <ul class="list-disc list-inside text-xs text-gray-600 ml-4">
+                    ${service.partsUsed.map(part => `<li>${part.partName} (x${part.quantity}) - ₹${part.unitCost.toFixed(2)} each</li>`).join('')}
+                </ul>
+            `;
+        }
+
+        const serviceItemHtml = `
+            <div class="service-card bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-xl font-semibold text-gray-800">Service for ${make} ${model}</h3>
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold uppercase ${serviceStatusClass}">
+                        ${serviceType.replace(/-/g, ' ')}
+                    </span>
+                </div>
+                <ul class="text-gray-600 space-y-1 text-sm mb-4">
+                    <li><span class="font-medium">License Plate:</span> ${licensePlate}</li>
+                    <li><span class="font-medium">Date:</span> ${serviceDate}</li>
+                    <li><span class="font-medium">Description:</span> ${service.description || 'N/A'}</li>
+                    <li><span class="font-medium">Estimated Cost:</span> ₹${service.cost ? service.cost.toFixed(2) : '0.00'}</li>
+                    <li><span class="font-medium">Total Bill:</span> ${totalBill}</li>
+                </ul>
+                ${partsListHtml}
+                <button data-service-id="${service._id}" class="view-service-details-btn mt-4 px-4 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors flex items-center justify-center">
+                    <i class="ri-information-line mr-2"></i> View Details
+                </button>
+            </div>
+        `;
+        return serviceItemHtml;
+    }
+
+    // Function to fetch and display user's vehicles
+    async function fetchAndDisplayVehicles() {
+        const vehicleList = document.getElementById('vehicle-list');
+        vehicleList.innerHTML = ''; // Clear existing vehicles
 
         const token = getToken();
-        if (!token) return; // Should be handled by checkAuthAndRedirect, but good defensive check
+        if (!token) return;
 
         try {
             const response = await fetch(`${BASE_URL}/api/vehicles`, {
@@ -743,18 +746,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
 
             if (response.ok) {
-                userVehicles = data; // Store fetched vehicles
-                if (userVehicles.length > 0) {
-                    userVehicles.forEach(vehicle => {
-                        // Render to My Vehicles section
-                        vehiclesList.insertAdjacentHTML('beforeend', renderVehicleCard(vehicle));
-
-                        // Populate Service Booking dropdown
-                        const option = document.createElement('option');
-                        option.value = vehicle._id;
-                        option.textContent = `${vehicle.make} ${vehicle.model} (${vehicle.licensePlate})`;
-                        serviceVehicleSelect.appendChild(option);
+                if (data.length > 0) {
+                    data.forEach(vehicle => {
+                        vehicleList.insertAdjacentHTML('beforeend', renderVehicleCard(vehicle));
                     });
+                    populateVehicleSelect(data); // Populate the select dropdown for booking
+                } else {
+                    populateVehicleSelect([]); // Clear the select dropdown
                 }
             } else {
                 showMessage(data.msg || 'Failed to fetch vehicles.', 'error');
@@ -763,52 +761,29 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error fetching vehicles:', error);
             showMessage('Network error while fetching vehicles.', 'error');
         } finally {
-            updateNoVehiclesMessage(); // Update message visibility after fetch attempt
+            updateNoVehiclesMessage(); // Update message visibility
         }
     }
 
-    // Function to render a single service history item
-    function renderServiceHistoryItem(service) {
-        const serviceDate = new Date(service.date).toLocaleDateString();
-        const serviceCost = service.cost ? `₹${service.cost.toFixed(2)}` : 'N/A';
-        // Ensure status class matches backend 'type' values (e.g., 'pending', 'in-progress')
-        const serviceStatusClass = `status-${service.type.toLowerCase().replace(/\s/g, '-')}`; 
+    // Function to populate the vehicle select dropdown for booking a service
+    function populateVehicleSelect(vehicles) {
+        const selectElement = document.getElementById('select-vehicle');
+        selectElement.innerHTML = '<option value="" disabled selected>-- Select a vehicle --</option>'; // Reset dropdown
 
-        // Check if vehicleId is populated and access its properties
-        const vehicleInfo = service.vehicleId ?
-            `${service.vehicleId.make} ${service.vehicleId.model} (${service.vehicleId.licensePlate})` :
-            'Unknown Vehicle';
-
-        const serviceItemHtml = `
-            <div class="bg-gray-50 p-4 rounded-lg shadow-sm mb-4 flex justify-between items-center">
-                <div>
-                    <p class="font-medium text-gray-800">${vehicleInfo} - ${service.type}</p>
-                    <p class="text-sm text-gray-600">Service Date: ${serviceDate}</p>
-                    <p class="text-sm text-gray-600">Description: ${service.description || 'No description provided'}</p>
-                    <p class="text-sm text-gray-600">Cost: ${serviceCost}</p>
-                </div>
-                <span class="px-3 py-1 text-sm font-medium rounded-full ${serviceStatusClass}">
-                    ${service.type.replace(/-/g, ' ')}
-                </span>
-            </div>
-        `;
-        return serviceItemHtml;
+        if (vehicles && vehicles.length > 0) {
+            vehicles.forEach(vehicle => {
+                const option = document.createElement('option');
+                option.value = vehicle._id;
+                option.textContent = `${vehicle.make} ${vehicle.model} (${vehicle.licensePlate})`;
+                selectElement.appendChild(option);
+            });
+        }
     }
 
-    // Function to fetch and display user's services (history and current)
-    async function fetchAndDisplayServices() {
+    // Function to fetch and display user's service history
+    async function fetchAndDisplayServiceHistory() {
         const serviceHistoryList = document.getElementById('service-history-list');
-        serviceHistoryList.innerHTML = ''; // Clear existing services
-
-        const currentServiceStatusContainer = document.getElementById('current-service-status-container');
-        const noCurrentServiceMessage = document.getElementById('no-current-service-message');
-        const noServiceHistoryMessage = document.getElementById('no-service-history-message'); // Get reference
-
-        currentServiceStatusContainer.classList.add('hidden'); // Hide current status initially
-        noCurrentServiceMessage.classList.remove('hidden'); // Show no current message initially
-        serviceHistoryList.classList.add('hidden'); // Hide history initially
-        noServiceHistoryMessage.classList.remove('hidden'); // Show no history message initially
-
+        serviceHistoryList.innerHTML = ''; // Clear existing history items
 
         const token = getToken();
         if (!token) return;
@@ -828,108 +803,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (data.length > 0) {
                     // Sort services by date descending (most recent first)
                     data.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                    let currentService = null;
-                    const historicalServices = []; // Array to store services for history
-
-                    // Iterate through sorted services to identify the *single* most recent current service
-                    // and collect all other services (including picked-up ones) for history.
                     data.forEach(service => {
-                        if (service.type.toLowerCase() !== 'picked-up' && !currentService) {
-                            // This is the most recent non-picked-up service for the "Current Status"
-                            currentService = service;
-                        } else {
-                            // All other services (including picked-up services, or older non-picked-up ones)
-                            // go into the historical list.
-                            historicalServices.push(service);
-                        }
+                        serviceHistoryList.insertAdjacentHTML('beforeend', renderServiceHistoryItem(service));
                     });
-
-                    // --- Display Current Service Status ---
-                    if (currentService) {
-                        const latestServiceDate = new Date(currentService.date).toLocaleDateString();
-                        const latestServiceStatusClass = `status-${currentService.type.toLowerCase().replace(/\s/g, '-')}`; 
-                        
-                        const vehicleInfoLatest = currentService.vehicleId ?
-                            `${currentService.vehicleId.make} ${currentService.vehicleId.model} (${currentService.vehicleId.licensePlate})` :
-                            'Unknown Vehicle';
-
-                        // Display current service status
-                        currentServiceStatusContainer.innerHTML = `
-                            <h3 class="text-xl font-semibold text-gray-800 mb-4">Current Servicing Status</h3>
-                            <div class="bg-blue-50 p-6 rounded-lg border border-blue-200 flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-4">
-                                <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center text-blue-700 flex-shrink-0">
-                                    <i class="ri-dashboard-line text-2xl"></i>
-                                </div>
-                                <div class="flex-grow">
-                                    <p class="text-gray-700 font-medium text-lg">Your ${vehicleInfoLatest} Service:</p>
-                                    <span class="font-bold text-xl ${latestServiceStatusClass}">
-                                        ${currentService.type.replace(/-/g, ' ')}
-                                    </span>
-                                    <span class="text-gray-500 text-sm ml-2">(Service Date: ${latestServiceDate})</span>
-                                    <p class="text-gray-600 text-sm mt-1">Details: ${currentService.description || 'No description provided'}</p>
-                                    <p class="text-gray-600 text-sm">Estimated Cost: ${currentService.cost ? `₹${currentService.cost.toFixed(2)}` : 'N/A'}</p>
-                                </div>
-                            </div>
-                        `;
-                        currentServiceStatusContainer.classList.remove('hidden');
-                        noCurrentServiceMessage.classList.add('hidden'); // Hide no current message
-                    } else {
-                        // If no current service (i.e., all services are 'picked-up' or no services)
-                        noCurrentServiceMessage.classList.remove('hidden'); // Ensure no current message is visible
-                    }
-
-                    // --- Display Servicing History ---
-                    if (historicalServices.length > 0) {
-                        historicalServices.forEach(service => {
-                            serviceHistoryList.insertAdjacentHTML('beforeend', renderServiceHistoryItem(service));
-                        });
-                        serviceHistoryList.classList.remove('hidden');
-                        noServiceHistoryMessage.classList.add('hidden'); // Hide no history message
-                    } else {
-                        serviceHistoryList.classList.add('hidden'); // Ensure history list is hidden
-                        noServiceHistoryMessage.classList.remove('hidden'); // Show no history message
-                    }
-
-                } else {
-                    // No services at all (data.length is 0)
-                    noCurrentServiceMessage.classList.remove('hidden');
-                    noServiceHistoryMessage.classList.remove('hidden');
                 }
             } else {
                 showMessage(data.msg || 'Failed to fetch service history.', 'error');
             }
         } catch (error) {
-            console.error('Error fetching services:', error);
-            showMessage('Network error while fetching services.', 'error');
+            console.error('Error fetching service history:', error);
+            showMessage('Network error while fetching service history.', 'error');
         } finally {
-            // No need for updateNoServiceHistoryMessage here as visibility is handled within the main logic
+            updateNoServiceHistoryMessage(); // Update message visibility
         }
     }
 
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Redirect to login if not authenticated
-        if (!checkAuthAndRedirect()) {
-            return; // Stop execution if not authenticated
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Redirect if not authenticated
+        if (!(await checkAuthAndRedirect())) {
+            return; // Stop execution if not authorized
         }
 
-        // Set user name from token (if available)
+        // Set user name
         const token = getToken();
         if (token) {
             const decoded = decodeToken(token);
             if (decoded && decoded.user && decoded.user.name) {
                 document.getElementById('user-name').textContent = decoded.user.name;
-            } else if (decoded && decoded.user && decoded.user.id) {
-                // If name is not in token, display user ID (or fetch profile data)
-                document.getElementById('user-name').textContent = decoded.user.id.substring(0, 8) + '...';
             }
         }
 
-
-        // Fetch and display data on page load
-        fetchAndDisplayVehicles(); // Updated to also populate service booking dropdown
-        fetchAndDisplayServices(); // Ensure this is called to load services
+        // Fetch and display vehicles and service history on page load
+        fetchAndDisplayVehicles();
+        fetchAndDisplayServiceHistory();
 
         // Logout functionality
         const logoutButton = document.getElementById('logout-button');
@@ -937,9 +844,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const performLogout = () => {
             localStorage.removeItem('token'); // Remove JWT token
-            showMessage('Logged out successfully. Redirecting to home page.', 'success');
+            showMessage('Logged out successfully. Redirecting to login page.', 'success');
             setTimeout(() => {
-                window.location.href = 'index.html'; // Redirect to index page
+                window.location.href = 'login.html'; // Redirect to login page
             }, 1500);
         };
 
@@ -950,35 +857,35 @@ document.addEventListener('DOMContentLoaded', function() {
             logoutButtonMobile.addEventListener('click', performLogout);
         }
 
-
-        // Show/Hide Add Vehicle Form
-        const showAddVehicleButton = document.getElementById('show-add-vehicle-form');
-        const addVehicleFormSection = document.getElementById('add-vehicle');
-        if (showAddVehicleButton && addVehicleFormSection) {
-            showAddVehicleButton.addEventListener('click', function() {
-                addVehicleFormSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                document.getElementById('vehicle-make').focus();
-            });
-        }
-
-        // Handle Add Vehicle Form Submission
+        // Add Vehicle Modal Logic
+        const addVehicleModal = document.getElementById('add-vehicle-modal');
+        const openAddVehicleModalBtn = document.getElementById('open-add-vehicle-modal');
+        const cancelAddVehicleBtn = document.getElementById('cancel-add-vehicle');
         const addVehicleForm = document.getElementById('add-vehicle-form');
 
+        openAddVehicleModalBtn.addEventListener('click', () => {
+            addVehicleModal.classList.remove('hidden');
+        });
+
+        cancelAddVehicleBtn.addEventListener('click', () => {
+            addVehicleModal.classList.add('hidden');
+            addVehicleForm.reset();
+        });
+
         addVehicleForm.addEventListener('submit', async function(e) {
-            e.preventDefault(); // Prevent default form submission
+            e.preventDefault();
 
-            const make = document.getElementById('vehicle-make').value.trim();
-            const model = document.getElementById('vehicle-model').value.trim();
-            const year = parseInt(document.getElementById('vehicle-year').value.trim()); // Parse year as number
-            const licensePlate = document.getElementById('license-plate').value.trim();
+            const make = document.getElementById('make').value.trim();
+            const model = document.getElementById('model').value.trim();
+            const year = parseInt(document.getElementById('year').value.trim());
+            const licensePlate = document.getElementById('licensePlate').value.trim();
 
-            // Client-side validation
             if (!make || !model || !year || !licensePlate) {
                 showMessage('Please fill in all vehicle details.', 'error');
                 return;
             }
             if (isNaN(year) || year < 1900 || year > 2099) {
-                showMessage('Please enter a valid year (e.g., 2020).', 'error');
+                showMessage('Please enter a valid year.', 'error');
                 return;
             }
 
@@ -993,7 +900,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-auth-token': token // Include the JWT token
+                        'x-auth-token': token
                     },
                     body: JSON.stringify({ make, model, year, licensePlate })
                 });
@@ -1001,10 +908,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json();
 
                 if (response.ok) {
-                    showMessage('Vehicle added successfully!', 'success');
-                    addVehicleForm.reset(); // Clear the form
-                    fetchAndDisplayVehicles(); // Refresh the list of vehicles and service dropdown
-                    fetchAndDisplayServices(); // Also refresh services as a new vehicle might get a service
+                    showMessage(data.msg || 'Vehicle added successfully!', 'success');
+                    addVehicleForm.reset();
+                    addVehicleModal.classList.add('hidden');
+                    fetchAndDisplayVehicles(); // Refresh the vehicle list
                 } else {
                     showMessage(data.msg || 'Failed to add vehicle.', 'error');
                 }
@@ -1014,39 +921,125 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Handle Delete Vehicle Button Click (Event Delegation)
-        document.getElementById('vehicles-list').addEventListener('click', async function(event) {
+        // Delete Vehicle Logic (Event Delegation)
+        const vehicleListContainer = document.getElementById('vehicle-list');
+        vehicleListContainer.addEventListener('click', async function(event) {
             const deleteButton = event.target.closest('.delete-vehicle-btn');
             if (deleteButton) {
                 const vehicleId = deleteButton.dataset.vehicleId;
+                showConfirmation('Delete Vehicle', 'Are you sure you want to delete this vehicle? This action cannot be undone.', async () => {
+                    // User confirmed 'Yes'
+                    const token = getToken();
+                    if (!token) {
+                        showMessage('Authentication token missing. Please log in again.', 'error');
+                        return;
+                    }
 
-                // Show custom confirmation modal
-                const confirmationModal = document.getElementById('confirmation-modal');
-                const confirmYes = document.getElementById('confirm-yes');
-                const confirmNo = document.getElementById('confirm-no');
-                const modalTitle = document.getElementById('confirmation-modal-title');
-                const modalMessage = document.getElementById('confirmation-modal-message');
+                    try {
+                        const response = await fetch(`${BASE_URL}/api/vehicles/${vehicleId}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'x-auth-token': token
+                            }
+                        });
 
-                modalTitle.textContent = 'Confirm Deletion';
-                modalMessage.textContent = 'Are you sure you want to delete this vehicle? This action cannot be undone.';
-                confirmationModal.classList.add('show');
+                        const data = await response.json();
 
-                // Use promises to wait for user's decision
-                const userConfirmed = await new Promise(resolve => {
-                    confirmYes.onclick = () => {
-                        confirmationModal.classList.remove('show');
-                        resolve(true);
-                    };
-                    confirmNo.onclick = () => {
-                        confirmationModal.classList.remove('show');
-                        resolve(false);
-                    };
+                        if (response.ok) {
+                            showMessage(data.msg || 'Vehicle deleted successfully!', 'success');
+                            fetchAndDisplayVehicles(); // Refresh the vehicle list
+                            fetchAndDisplayServiceHistory(); // Refresh service history as well (vehicle might be linked)
+                        } else {
+                            showMessage(data.msg || 'Failed to delete vehicle.', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting vehicle:', error);
+                        showMessage('Network error while deleting vehicle.', 'error');
+                    }
+                });
+            }
+        });
+
+        // Book Service Form Submission
+        const bookServiceForm = document.getElementById('book-service-form');
+        bookServiceForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const vehicleId = document.getElementById('select-vehicle').value;
+            const date = document.getElementById('service-date').value;
+            const type = document.getElementById('service-type').value;
+            const description = document.getElementById('service-description').value.trim();
+
+            if (!vehicleId || !date || !type) {
+                showMessage('Please select a vehicle, date, and service type.', 'error');
+                return;
+            }
+
+            const token = getToken();
+            if (!token) {
+                showMessage('Authentication token missing. Please log in again.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/services`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify({ vehicleId, date, type, description, cost: 0, partsUsed: [], totalBill: 0 }) // User booking always starts with 0 cost/bill/parts
                 });
 
-                if (!userConfirmed) {
-                    return; // User cancelled deletion
-                }
+                const data = await response.json();
 
+                if (response.ok) {
+                    showMessage(data.msg || 'Service booked successfully! We will contact you shortly.', 'success');
+                    bookServiceForm.reset();
+                    fetchAndDisplayServiceHistory(); // Refresh service history
+                } else {
+                    showMessage(data.msg || 'Failed to book service.', 'error');
+                }
+            } catch (error) {
+                console.error('Error booking service:', error);
+                showMessage('Network error while booking service.', 'error');
+            }
+        });
+
+        // Confirmation Modal Logic
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmYesBtn = document.getElementById('confirm-yes');
+        const confirmNoBtn = document.getElementById('confirm-no');
+        let currentConfirmAction = null;
+
+        function showConfirmation(title, message, onConfirm) {
+            document.getElementById('confirmation-modal-title').textContent = title;
+            document.getElementById('confirmation-modal-message').textContent = message;
+            confirmationModal.classList.add('show');
+            currentConfirmAction = onConfirm;
+        }
+
+        confirmYesBtn.addEventListener('click', () => {
+            if (currentConfirmAction) {
+                currentConfirmAction();
+            }
+            confirmationModal.classList.remove('show');
+        });
+
+        confirmNoBtn.addEventListener('click', () => {
+            confirmationModal.classList.remove('show');
+            currentConfirmAction = null;
+        });
+
+        // View Service Details Modal Logic
+        const viewServiceDetailsModal = document.getElementById('view-service-details-modal');
+        const closeServiceDetailsBtn = document.getElementById('close-service-details-btn');
+        const serviceHistoryList = document.getElementById('service-history-list'); // Re-selecting for clarity
+
+        serviceHistoryList.addEventListener('click', async function(event) {
+            const viewDetailsButton = event.target.closest('.view-service-details-btn');
+            if (viewDetailsButton) {
+                const serviceId = viewDetailsButton.dataset.serviceId;
                 const token = getToken();
                 if (!token) {
                     showMessage('Authentication token missing. Please log in again.', 'error');
@@ -1054,84 +1047,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 try {
-                    const response = await fetch(`${BASE_URL}/api/vehicles/${vehicleId}`, {
-                        method: 'DELETE',
+                    const response = await fetch(`${BASE_URL}/api/services`, { // Fetch all services to find the specific one
+                        method: 'GET',
                         headers: {
-                            'x-auth-token': token // Include the JWT token
+                            'x-auth-token': token
                         }
                     });
+                    const allServices = await response.json();
+                    const serviceToView = allServices.find(s => s._id === serviceId);
 
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        showMessage('Vehicle deleted successfully!', 'success');
-                        fetchAndDisplayVehicles(); // Refresh the list of vehicles and service dropdown
-                        fetchAndDisplayServices(); // Refresh services as a vehicle might be deleted
-                    } else {
-                        showMessage(data.msg || 'Failed to delete vehicle.', 'error');
+                    if (!serviceToView) {
+                        showMessage('Service details not found.', 'error');
+                        return;
                     }
+
+                    // Populate the modal fields
+                    document.getElementById('detail-vehicle').textContent = serviceToView.vehicleId ? `${serviceToView.vehicleId.make} ${serviceToView.vehicleId.model}` : 'N/A';
+                    document.getElementById('detail-license-plate').textContent = serviceToView.vehicleId ? serviceToView.vehicleId.licensePlate : 'N/A';
+                    document.getElementById('detail-date').textContent = serviceToView.date ? new Date(serviceToView.date).toLocaleDateString() : 'N/A';
+                    document.getElementById('detail-status').textContent = serviceToView.type ? serviceToView.type.replace(/-/g, ' ') : 'N/A';
+                    document.getElementById('detail-description').textContent = serviceToView.description || 'No description provided.';
+                    document.getElementById('detail-estimated-cost').textContent = serviceToView.cost !== undefined ? `₹${serviceToView.cost.toFixed(2)}` : 'N/A';
+                    document.getElementById('detail-total-bill').textContent = serviceToView.totalBill !== undefined ? `₹${serviceToView.totalBill.toFixed(2)}` : 'N/A';
+
+                    // Populate parts used
+                    const detailPartsUsedContainer = document.getElementById('detail-parts-used');
+                    detailPartsUsedContainer.innerHTML = ''; // Clear previous parts
+                    if (serviceToView.partsUsed && serviceToView.partsUsed.length > 0) {
+                        serviceToView.partsUsed.forEach(part => {
+                            const partDiv = document.createElement('div');
+                            partDiv.className = 'part-item text-sm text-gray-600';
+                            partDiv.innerHTML = `
+                                <span>${part.partName} (x${part.quantity})</span>
+                                <span>₹${part.unitCost.toFixed(2)} each</span>
+                            `;
+                            detailPartsUsedContainer.appendChild(partDiv);
+                        });
+                        document.getElementById('no-parts-message').classList.add('hidden');
+                    } else {
+                        document.getElementById('no-parts-message').classList.remove('hidden');
+                    }
+
+                    viewServiceDetailsModal.classList.add('show');
+
                 } catch (error) {
-                    console.error('Error deleting vehicle:', error);
-                    showMessage('Network error while deleting vehicle.', 'error');
+                    console.error('Error fetching service details for view:', error);
+                    showMessage('Network error while fetching service details.', 'error');
                 }
             }
         });
 
-        // Handle Book Service Form Submission
-        const bookServiceForm = document.getElementById('book-service-form');
-        if (bookServiceForm) {
-            bookServiceForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
+        closeServiceDetailsBtn.addEventListener('click', () => {
+            viewServiceDetailsModal.classList.remove('show');
+        });
 
-                const vehicleId = document.getElementById('service-vehicle').value;
-                const serviceType = document.getElementById('service-type').value;
-                const serviceDate = document.getElementById('service-date').value;
-                const serviceDescription = document.getElementById('service-description').value.trim();
-
-                // Client-side validation
-                if (!vehicleId || !serviceType || !serviceDate) {
-                    showMessage('Please select a vehicle, service type, and preferred date.', 'error');
-                    return;
-                }
-
-                const token = getToken();
-                if (!token) {
-                    showMessage('Authentication token missing. Please log in again.', 'error');
-                    return;
-                }
-
-                try {
-                    // Send cost as 0 for user-initiated bookings; admin will update it.
-                    const response = await fetch(`${BASE_URL}/api/services`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'x-auth-token': token
-                        },
-                        body: JSON.stringify({ 
-                            vehicleId, 
-                            date: serviceDate, 
-                            type: serviceType, 
-                            description: serviceDescription,
-                            cost: 0 // Default cost for user-initiated bookings
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        showMessage('Service booking requested successfully! We will review it shortly.', 'success');
-                        bookServiceForm.reset(); // Clear the form
-                        fetchAndDisplayServices(); // Refresh the services list
-                    } else {
-                        showMessage(data.msg || 'Failed to book service. Please try again.', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error booking service:', error);
-                    showMessage('Network error while booking service.', 'error');
-                }
-            });
-        }
     });
 </script>
 

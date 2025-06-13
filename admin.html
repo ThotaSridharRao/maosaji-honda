@@ -235,6 +235,66 @@ body {
 .confirmation-modal.show .confirmation-modal-content {
     transform: translateY(0);
 }
+
+/* Modal for editing service details */
+.edit-service-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10002;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+.edit-service-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+.edit-service-modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    max-width: 700px;
+    width: 95%;
+    max-height: 90%;
+    overflow-y: auto; /* Enable scrolling for content if it overflows */
+    transform: translateY(20px);
+    transition: transform 0.3s ease-in-out;
+}
+.edit-service-modal.show .edit-service-modal-content {
+    transform: translateY(0);
+}
+.part-entry {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 0.5fr; /* Name, Qty, Cost, Remove */
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.part-entry input {
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+}
+.part-entry .remove-part-btn {
+    background-color: #ef4444; /* red-500 */
+    color: white;
+    padding: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.part-entry .remove-part-btn:hover {
+    background-color: #dc2626; /* red-600 */
+}
+
 </style>
 </head>
 <body>
@@ -264,6 +324,77 @@ body {
         </div>
     </div>
 </div>
+
+<!-- Edit Service Details Modal -->
+<div id="edit-service-modal" class="edit-service-modal">
+    <div class="edit-service-modal-content">
+        <h3 class="text-2xl font-bold mb-6 text-gray-800">Edit Service Details</h3>
+        <form id="edit-service-form">
+            <input type="hidden" id="edit-service-id">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="edit-service-date" class="block text-gray-700 mb-2">Service Date</label>
+                    <input type="date" id="edit-service-date" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                <div>
+                    <label for="edit-service-type" class="block text-gray-700 mb-2">Service Type / Current Status</label>
+                    <div class="relative">
+                        <select id="edit-service-type" class="w-full px-4 py-3 border border-gray-300 rounded appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent pr-8">
+                            <option value="pending">Pending</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                            <option value="ready-for-pickup">Ready for Pickup</option>
+                            <option value="picked-up">Picked Up</option>
+                            <option value="cancelled">Cancelled</option>
+                            <option value="Oil Change">Oil Change</option>
+                            <option value="Tire Rotation">Tire Rotation</option>
+                            <option value="Brake Inspection">Brake Inspection</option>
+                            <option value="Engine Diagnostic">Engine Diagnostic</option>
+                            <option value="Fluid Check">Fluid Check</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                            <i class="ri-arrow-down-s-line text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label for="edit-service-description" class="block text-gray-700 mb-2">Description</label>
+                <textarea id="edit-service-description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label for="edit-service-cost" class="block text-gray-700 mb-2">Estimated Cost (₹)</label>
+                    <input type="number" id="edit-service-cost" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" step="0.01">
+                </div>
+                <div>
+                    <label for="edit-total-bill" class="block text-gray-700 mb-2">Total Bill (₹)</label>
+                    <input type="number" id="edit-total-bill" class="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" step="0.01">
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold mb-3 text-gray-800">Parts Used</h4>
+                <div id="parts-container">
+                    <!-- Parts will be dynamically added here -->
+                </div>
+                <button type="button" id="add-part-btn" class="px-4 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors flex items-center mt-2">
+                    <i class="ri-add-line mr-2"></i> Add Part
+                </button>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <button type="button" id="cancel-edit-btn" class="px-6 py-3 bg-gray-300 text-gray-800 rounded-button font-medium hover:bg-gray-400 transition-colors">Cancel</button>
+                <button type="submit" class="px-6 py-3 bg-primary text-white rounded-button font-medium hover:bg-opacity-90 transition-all">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 <!-- Navigation (Header) -->
 <nav class="bg-white shadow-md fixed w-full z-50 transition-all duration-300" id="navbar">
@@ -431,7 +562,7 @@ body {
                     <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
                         <i class="ri-twitter-fill"></i>
                     </a>
-                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
+                    <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify- center">
                         <i class="ri-instagram-line"></i>
                     </a>
                     <a href="#" class="w-10 h-10 rounded-full bg-gray-700 hover:bg-primary transition-colors duration-300 flex items-center justify-center">
@@ -651,6 +782,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <li><span class="font-medium">Customer:</span> ${customerName}</li>
                         <li><span class="font-medium">Phone:</span> <a href="tel:${customerPhone}" class="text-blue-600 hover:underline">${customerPhone}</a></li>
                         <li><span class="font-medium">Service ID:</span> ${service._id}</li>
+                        <li><span class="font-medium">Est. Cost:</span> ₹${service.cost ? service.cost.toFixed(2) : '0.00'}</li>
+                        <li><span class="font-medium">Total Bill:</span> ₹${service.totalBill ? service.totalBill.toFixed(2) : '0.00'}</li>
                     </ul>
                     <div class="mb-4">
                         <span class="text-sm font-medium">Status:</span>
@@ -658,7 +791,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ${service.type.replace(/-/g, ' ')}
                         </span>
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 mt-4">
                         <label for="status-${service._id}" class="text-sm text-gray-600 whitespace-nowrap">Update Status:</label>
                         <select id="status-${service._id}" class="status-selector flex-grow px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-primary">
                             <option value="pending" ${currentStatus === 'pending' ? 'selected' : ''}>Pending</option>
@@ -672,6 +805,9 @@ document.addEventListener('DOMContentLoaded', function() {
                             Update
                         </button>
                     </div>
+                    <button data-service-id="${service._id}" class="edit-service-details-btn mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors flex items-center justify-center">
+                        <i class="ri-edit-line mr-2"></i> Edit Details
+                    </button>
                 </div>
             </div>
         `;
@@ -688,6 +824,18 @@ document.addEventListener('DOMContentLoaded', function() {
         const customerPhone = service.customerPhone || 'N/A'; 
         const serviceType = service.type;
         const serviceStatusClass = `status-${service.type.toLowerCase().replace(/\s/g, '-')}`;
+        const totalBill = service.totalBill ? `₹${service.totalBill.toFixed(2)}` : 'N/A';
+
+        let partsListHtml = '';
+        if (service.partsUsed && service.partsUsed.length > 0) {
+            partsListHtml = `
+                <p class="text-sm text-gray-700 font-medium mt-2">Parts Used:</p>
+                <ul class="list-disc list-inside text-xs text-gray-600 ml-4">
+                    ${service.partsUsed.map(part => `<li>${part.partName} (x${part.quantity}) - ₹${part.unitCost.toFixed(2)} each</li>`).join('')}
+                </ul>
+            `;
+        }
+
 
         const activityItemHtml = `
             <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
@@ -700,6 +848,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <p class="text-sm text-gray-600 mb-1">Customer: ${customerName} (Phone: ${customerPhone})</p>
                 <p class="text-sm text-gray-600">Date: ${serviceDate}</p>
+                <p class="text-sm text-gray-600">Description: ${service.description || 'N/A'}</p>
+                <p class="text-sm text-gray-600 font-bold">Total Bill: ${totalBill}</p>
+                ${partsListHtml}
             </div>
         `;
         return activityItemHtml;
@@ -783,6 +934,23 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Function to add a part input row in the edit modal
+    function addPartInputRow(part = { partName: '', quantity: 1, unitCost: 0 }) {
+        const partsContainer = document.getElementById('parts-container');
+        const newPartEntry = document.createElement('div');
+        newPartEntry.className = 'part-entry';
+        newPartEntry.innerHTML = `
+            <input type="text" placeholder="Part Name" value="${part.partName}" class="part-name-input" required>
+            <input type="number" placeholder="Qty" value="${part.quantity}" class="part-quantity-input" min="1" required>
+            <input type="number" placeholder="Cost" value="${part.unitCost.toFixed(2)}" class="part-unit-cost-input" step="0.01" min="0" required>
+            <button type="button" class="remove-part-btn"><i class="ri-delete-bin-line"></i></button>
+        `;
+        partsContainer.appendChild(newPartEntry);
+
+        newPartEntry.querySelector('.remove-part-btn').addEventListener('click', () => {
+            partsContainer.removeChild(newPartEntry);
+        });
+    }
 
     document.addEventListener('DOMContentLoaded', async function() {
         // Redirect if not authenticated or not admin
@@ -851,7 +1019,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             if (isNaN(cost) || cost < 0) {
-                showMessage('Please enter a valid cost (number).', 'error');
+                showMessage('Please enter a valid estimated cost (number).', 'error');
                 return;
             }
 
@@ -876,7 +1044,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         customerPhone,
                         type: serviceType, // 'type' field in service schema acts as status
                         description,
-                        cost
+                        cost,
+                        // No partsUsed or totalBill for initial add, these are added via "Edit Details"
+                        partsUsed: [], 
+                        totalBill: 0 
                     })
                 });
 
@@ -948,6 +1119,140 @@ document.addEventListener('DOMContentLoaded', function() {
                     console.error('Error updating service status:', error);
                     showMessage('Network error while updating service status.', 'error');
                 }
+            }
+        });
+
+        // Handle "Edit Details" button click
+        serviceVehiclesList.addEventListener('click', async function(event) {
+            const editButton = event.target.closest('.edit-service-details-btn');
+            if (editButton) {
+                const serviceId = editButton.dataset.serviceId;
+                const token = getToken();
+                if (!token) {
+                    showMessage('Authentication token missing. Please log in again.', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`${BASE_URL}/api/services`, { // Fetch all services to find the specific one
+                        method: 'GET',
+                        headers: {
+                            'x-auth-token': token
+                        }
+                    });
+                    const allServices = await response.json();
+                    const serviceToEdit = allServices.find(s => s._id === serviceId);
+
+                    if (!serviceToEdit) {
+                        showMessage('Service not found for editing.', 'error');
+                        return;
+                    }
+
+                    // Populate the modal fields
+                    document.getElementById('edit-service-id').value = serviceToEdit._id;
+                    // Format date to YYYY-MM-DD for input type="date"
+                    document.getElementById('edit-service-date').value = serviceToEdit.date ? new Date(serviceToEdit.date).toISOString().split('T')[0] : '';
+                    document.getElementById('edit-service-type').value = serviceToEdit.type;
+                    document.getElementById('edit-service-description').value = serviceToEdit.description || '';
+                    document.getElementById('edit-service-cost').value = serviceToEdit.cost !== undefined ? serviceToEdit.cost : '';
+                    document.getElementById('edit-total-bill').value = serviceToEdit.totalBill !== undefined ? serviceToEdit.totalBill : '';
+
+                    // Clear existing parts and add them from the service object
+                    const partsContainer = document.getElementById('parts-container');
+                    partsContainer.innerHTML = ''; // Clear existing
+                    if (serviceToEdit.partsUsed && serviceToEdit.partsUsed.length > 0) {
+                        serviceToEdit.partsUsed.forEach(part => addPartInputRow(part));
+                    } else {
+                        addPartInputRow(); // Add one empty row if no parts
+                    }
+                    
+                    // Show the modal
+                    document.getElementById('edit-service-modal').classList.add('show');
+
+                } catch (error) {
+                    console.error('Error fetching service for edit:', error);
+                    showMessage('Network error while fetching service for edit.', 'error');
+                }
+            }
+        });
+
+        // Handle "Add Part" button in the edit modal
+        document.getElementById('add-part-btn').addEventListener('click', () => {
+            addPartInputRow();
+        });
+
+        // Handle "Cancel" button in the edit modal
+        document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+            document.getElementById('edit-service-modal').classList.remove('show');
+        });
+
+        // Handle "Save Changes" on Edit Service Form Submission
+        document.getElementById('edit-service-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const serviceId = document.getElementById('edit-service-id').value;
+            const date = document.getElementById('edit-service-date').value;
+            const type = document.getElementById('edit-service-type').value;
+            const description = document.getElementById('edit-service-description').value.trim();
+            const cost = parseFloat(document.getElementById('edit-service-cost').value.trim());
+            const totalBill = parseFloat(document.getElementById('edit-total-bill').value.trim());
+
+            const parts = [];
+            const partEntries = document.querySelectorAll('#parts-container .part-entry');
+            let isValidParts = true;
+            partEntries.forEach(entry => {
+                const partName = entry.querySelector('.part-name-input').value.trim();
+                const quantity = parseInt(entry.querySelector('.part-quantity-input').value.trim());
+                const unitCost = parseFloat(entry.querySelector('.part-unit-cost-input').value.trim());
+
+                if (partName && !isNaN(quantity) && quantity > 0 && !isNaN(unitCost) && unitCost >= 0) {
+                    parts.push({ partName, quantity, unitCost });
+                } else if (partName || !isNaN(quantity) || !isNaN(unitCost)) { // If some part fields are filled, but not all valid
+                    isValidParts = false;
+                }
+            });
+
+            if (!isValidParts) {
+                showMessage('Please ensure all part entries have valid Name, Quantity (>0), and Cost (>=0).', 'error');
+                return;
+            }
+
+            const token = getToken();
+            if (!token) {
+                showMessage('Authentication token missing. Please log in again.', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/api/services/${serviceId}`, {
+                    method: 'PUT', // Using PUT for comprehensive update
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    },
+                    body: JSON.stringify({
+                        date,
+                        type,
+                        description,
+                        cost,
+                        partsUsed: parts,
+                        totalBill
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.msg || 'Service details updated successfully!', 'success');
+                    document.getElementById('edit-service-modal').classList.remove('show'); // Hide modal
+                    fetchAndDisplayCurrentServices(); // Refresh current services
+                    fetchAndDisplayRecentActivity(); // Refresh recent activity
+                } else {
+                    showMessage(data.msg || 'Failed to update service details.', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating service details:', error);
+                showMessage('Network error while updating service details.', 'error');
             }
         });
     });
