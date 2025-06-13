@@ -684,6 +684,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Global variable to store fetched services for easy access in modals
     let userServices = []; 
+    // This is the current service that the modal is showing.
+    // It's defined globally so that the close button can access it.
+    let currentServiceInModal = null;
+
 
     // Function to render a single service history item
     function renderServiceHistoryItem(service) {
@@ -868,12 +872,22 @@ document.addEventListener('DOMContentLoaded', function() {
         const addVehicleForm = document.getElementById('add-vehicle-form');
 
         openAddVehicleModalBtn.addEventListener('click', () => {
-            addVehicleModal.classList.remove('hidden');
+            if (addVehicleModal) { // Add null check
+                addVehicleModal.classList.remove('hidden');
+            } else {
+                console.error("Error: addVehicleModal element not found when trying to open.");
+                showMessage('Failed to open add vehicle modal.', 'error');
+            }
         });
 
         cancelAddVehicleBtn.addEventListener('click', () => {
-            addVehicleModal.classList.add('hidden');
-            addVehicleForm.reset();
+            if (addVehicleModal) { // Add null check
+                addVehicleModal.classList.add('hidden');
+                addVehicleForm.reset();
+            } else {
+                console.error("Error: addVehicleModal element not found when trying to cancel.");
+                showMessage('Failed to close add vehicle modal.', 'error');
+            }
         });
 
         addVehicleForm.addEventListener('submit', async function(e) {
@@ -914,7 +928,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (response.ok) {
                     showMessage(data.msg || 'Vehicle added successfully!', 'success');
                     addVehicleForm.reset();
-                    addVehicleModal.classList.add('hidden');
+                    if (addVehicleModal) { // Add null check
+                        addVehicleModal.classList.add('hidden');
+                    }
                     fetchAndDisplayVehicles(); // Refresh the vehicle list
                 } else {
                     showMessage(data.msg || 'Failed to add vehicle.', 'error');
@@ -1019,7 +1035,9 @@ document.addEventListener('DOMContentLoaded', function() {
         function showConfirmation(title, message, onConfirm) {
             document.getElementById('confirmation-modal-title').textContent = title;
             document.getElementById('confirmation-modal-message').textContent = message;
-            confirmationModal.classList.add('show');
+            if (confirmationModal) { // Add null check
+                confirmationModal.classList.add('show');
+            }
             currentConfirmAction = onConfirm;
         }
 
@@ -1027,67 +1045,88 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentConfirmAction) {
                 currentConfirmAction();
             }
-            confirmationModal.classList.remove('show');
+            if (confirmationModal) { // Add null check
+                confirmationModal.classList.remove('show');
+            }
         });
 
         confirmNoBtn.addEventListener('click', () => {
-            confirmationModal.classList.remove('show');
+            if (confirmationModal) { // Add null check
+                confirmationModal.classList.remove('show');
+            }
             currentConfirmAction = null;
         });
 
         // View Service Details Modal Logic
         const viewServiceDetailsModal = document.getElementById('view-service-details-modal');
         const closeServiceDetailsBtn = document.getElementById('close-service-details-btn');
-        const serviceHistoryList = document.getElementById('service-history-list'); // Re-selecting for clarity
+        const serviceHistoryListElement = document.getElementById('service-history-list'); // Renamed for clarity, using 'Element' suffix
 
-        serviceHistoryList.addEventListener('click', async function(event) {
-            const viewDetailsButton = event.target.closest('.view-service-details-btn');
-            if (viewDetailsButton) {
-                const serviceId = viewDetailsButton.dataset.serviceId;
-                // Find the service directly from the globally stored userServices array
-                const serviceToView = userServices.find(s => s._id === serviceId);
+        if (serviceHistoryListElement) { // Ensure serviceHistoryListElement exists before adding listener
+            serviceHistoryListElement.addEventListener('click', async function(event) {
+                const viewDetailsButton = event.target.closest('.view-service-details-btn');
+                if (viewDetailsButton) {
+                    const serviceId = viewDetailsButton.dataset.serviceId;
+                    // Find the service directly from the globally stored userServices array
+                    const serviceToView = userServices.find(s => s._id === serviceId);
 
-                if (!serviceToView) {
-                    showMessage('Service details not found or failed to load.', 'error');
-                    return;
+                    if (!serviceToView) {
+                        showMessage('Service details not found or failed to load.', 'error');
+                        return;
+                    }
+
+                    // Populate the modal fields
+                    document.getElementById('detail-vehicle').textContent = serviceToView.vehicleId ? `${serviceToView.vehicleId.make} ${serviceToView.vehicleId.model}` : 'N/A';
+                    document.getElementById('detail-license-plate').textContent = serviceToView.vehicleId ? serviceToView.vehicleId.licensePlate : 'N/A';
+                    document.getElementById('detail-date').textContent = serviceToView.date ? new Date(serviceToView.date).toLocaleDateString() : 'N/A';
+                    document.getElementById('detail-status').textContent = serviceToView.type ? serviceToView.type.replace(/-/g, ' ') : 'N/A';
+                    document.getElementById('detail-description').textContent = serviceToView.description || 'No description provided.';
+                    document.getElementById('detail-estimated-cost').textContent = serviceToView.cost !== undefined ? `₹${serviceToView.cost.toFixed(2)}` : 'N/A';
+                    document.getElementById('detail-total-bill').textContent = serviceToView.totalBill !== undefined ? `₹${serviceToView.totalBill.toFixed(2)}` : 'N/A';
+
+                    // Populate parts used
+                    const detailPartsUsedContainer = document.getElementById('detail-parts-used');
+                    if (detailPartsUsedContainer) { // Add null check for container
+                        detailPartsUsedContainer.innerHTML = ''; // Clear previous parts
+                        if (serviceToView.partsUsed && serviceToView.partsUsed.length > 0) {
+                            serviceToView.partsUsed.forEach(part => {
+                                const partDiv = document.createElement('div');
+                                partDiv.className = 'part-item text-sm text-gray-600';
+                                partDiv.innerHTML = `
+                                    <span>${part.partName} (x${part.quantity})</span>
+                                    <span>₹${part.unitCost.toFixed(2)} each</span>
+                                `;
+                                detailPartsUsedContainer.appendChild(partDiv);
+                            });
+                            const noPartsMessage = document.getElementById('no-parts-message');
+                            if (noPartsMessage) noPartsMessage.classList.add('hidden');
+                        } else {
+                            const noPartsMessage = document.getElementById('no-parts-message');
+                            if (noPartsMessage) noPartsMessage.classList.remove('hidden');
+                        }
+                    }
+
+                    if (viewServiceDetailsModal) { // Add null check here
+                        viewServiceDetailsModal.classList.add('show');
+                    } else {
+                        console.error("Error: viewServiceDetailsModal is null when trying to add 'show' class.");
+                        showMessage('Failed to open service details modal. Element not found.', 'error');
+                    }
                 }
+            });
+        }
 
-                // Populate the modal fields
-                document.getElementById('detail-vehicle').textContent = serviceToView.vehicleId ? `${serviceToView.vehicleId.make} ${serviceToView.vehicleId.model}` : 'N/A';
-                document.getElementById('detail-license-plate').textContent = serviceToView.vehicleId ? serviceToView.vehicleId.licensePlate : 'N/A';
-                document.getElementById('detail-date').textContent = serviceToView.date ? new Date(serviceToView.date).toLocaleDateString() : 'N/A';
-                document.getElementById('detail-status').textContent = serviceToView.type ? serviceToView.type.replace(/-/g, ' ') : 'N/A';
-                document.getElementById('detail-description').textContent = serviceToView.description || 'No description provided.';
-                document.getElementById('detail-estimated-cost').textContent = serviceToView.cost !== undefined ? `₹${serviceToView.cost.toFixed(2)}` : 'N/A';
-                document.getElementById('detail-total-bill').textContent = serviceToView.totalBill !== undefined ? `₹${serviceToView.totalBill.toFixed(2)}` : 'N/A';
 
-                // Populate parts used
-                const detailPartsUsedContainer = document.getElementById('detail-parts-used');
-                detailPartsUsedContainer.innerHTML = ''; // Clear previous parts
-                if (serviceToView.partsUsed && serviceToView.partsUsed.length > 0) {
-                    serviceToView.partsUsed.forEach(part => {
-                        const partDiv = document.createElement('div');
-                        partDiv.className = 'part-item text-sm text-gray-600';
-                        partDiv.innerHTML = `
-                            <span>${part.partName} (x${part.quantity})</span>
-                            <span>₹${part.unitCost.toFixed(2)} each</span>
-                        `;
-                        detailPartsUsedContainer.appendChild(partDiv);
-                    });
-                    document.getElementById('no-parts-message').classList.add('hidden');
+        if (closeServiceDetailsBtn) { // Ensure close button exists before adding listener
+            closeServiceDetailsBtn.addEventListener('click', () => {
+                if (viewServiceDetailsModal) { // Add null check here
+                    viewServiceDetailsModal.classList.remove('show');
                 } else {
-                    document.getElementById('no-parts-message').classList.remove('hidden');
+                    console.error("Error: viewServiceDetailsModal is null when trying to remove 'show' class.");
+                    showMessage('Failed to close service details modal. Element not found.', 'error');
                 }
-
-                viewServiceDetailsModal.classList.add('show');
-
-            }
-        });
-
-        closeServiceDetailsBtn.addEventListener('click', () => {
-            viewServiceDetailsModal.classList.remove('show');
-        });
-
+            });
+        }
     });
 </script>
 
