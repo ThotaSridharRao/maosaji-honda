@@ -935,15 +935,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Function to add a part input row in the edit modal
-    function addPartInputRow(part = { partName: '', quantity: 1, unitCost: 0 }) {
+    function addPartInputRow(part = { partName: '', quantity: '', unitCost: '' }) { // Changed defaults to empty strings for easier clearing
         const partsContainer = document.getElementById('parts-container');
         const newPartEntry = document.createElement('div');
         newPartEntry.className = 'part-entry';
         newPartEntry.innerHTML = `
-            <input type="text" placeholder="Part Name" value="${part.partName}" class="part-name-input" required>
-            <input type="number" placeholder="Qty" value="${part.quantity}" class="part-quantity-input" min="1" required>
-            <input type="number" placeholder="Cost" value="${part.unitCost.toFixed(2)}" class="part-unit-cost-input" step="0.01" min="0" required>
-            <button type="button" class="remove-part-btn"><i class="ri-delete-bin-line"></i></button>
+            <input type="text" placeholder="Part Name" value="${part.partName}" class="part-name-input px-3 py-2 border border-gray-300 rounded" required>
+            <input type="number" placeholder="Qty" value="${part.quantity}" class="part-quantity-input px-3 py-2 border border-gray-300 rounded" min="1" required>
+            <input type="number" placeholder="Cost" value="${part.unitCost}" class="part-unit-cost-input px-3 py-2 border border-gray-300 rounded" step="0.01" min="0" required>
+            <button type="button" class="remove-part-btn w-full h-full flex items-center justify-center text-red-500 hover:text-red-700 transition-colors"><i class="ri-delete-bin-line"></i></button>
         `;
         partsContainer.appendChild(newPartEntry);
 
@@ -1150,7 +1150,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Populate the modal fields
                     document.getElementById('edit-service-id').value = serviceToEdit._id;
-                    // Format date to YYYY-MM-DD for input type="date"
+                    // Format date toYYYY-MM-DD for input type="date"
                     document.getElementById('edit-service-date').value = serviceToEdit.date ? new Date(serviceToEdit.date).toISOString().split('T')[0] : '';
                     document.getElementById('edit-service-type').value = serviceToEdit.type;
                     document.getElementById('edit-service-description').value = serviceToEdit.description || '';
@@ -1201,19 +1201,25 @@ document.addEventListener('DOMContentLoaded', function() {
             const partEntries = document.querySelectorAll('#parts-container .part-entry');
             let isValidParts = true;
             partEntries.forEach(entry => {
-                const partName = entry.querySelector('.part-name-input').value.trim();
-                const quantity = parseInt(entry.querySelector('.part-quantity-input').value.trim());
-                const unitCost = parseFloat(entry.querySelector('.part-unit-cost-input').value.trim());
+                const partNameInput = entry.querySelector('.part-name-input');
+                const quantityInput = entry.querySelector('.part-quantity-input');
+                const unitCostInput = entry.querySelector('.part-unit-cost-input');
 
+                const partName = partNameInput.value.trim();
+                const quantity = parseInt(quantityInput.value.trim());
+                const unitCost = parseFloat(unitCostInput.value.trim());
+
+                // Only include parts where ALL fields are valid and filled
                 if (partName && !isNaN(quantity) && quantity > 0 && !isNaN(unitCost) && unitCost >= 0) {
                     parts.push({ partName, quantity, unitCost });
-                } else if (partName || !isNaN(quantity) || !isNaN(unitCost)) { // If some part fields are filled, but not all valid
+                } else if (partName || quantityInput.value.trim() !== '' || unitCostInput.value.trim() !== '') {
+                    // If any part of the row has content but is not fully valid, mark as invalid
                     isValidParts = false;
                 }
             });
 
             if (!isValidParts) {
-                showMessage('Please ensure all part entries have valid Name, Quantity (>0), and Cost (>=0).', 'error');
+                showMessage('Please ensure all part entries have valid Name, Quantity (>0), and Cost (>=0). Incomplete part rows will be ignored.', 'error');
                 return;
             }
 
@@ -1235,7 +1241,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         type,
                         description,
                         cost,
-                        partsUsed: parts,
+                        partsUsed: parts, // Send the collected parts array
                         totalBill
                     })
                 });
@@ -1249,6 +1255,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     fetchAndDisplayRecentActivity(); // Refresh recent activity
                 } else {
                     showMessage(data.msg || 'Failed to update service details.', 'error');
+                    console.error('Backend error data:', data); // Log the full error from backend
                 }
             } catch (error) {
                 console.error('Error updating service details:', error);
