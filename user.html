@@ -10,6 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
 tailwind.config = {
     theme: {
@@ -718,7 +719,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <li><span class="font-medium">Total Bill:</span> ${totalBill}</li>
                 </ul>
                 ${partsListHtml}
-                
+                <div class="flex justify-end mt-4">
+                    <button data-service-id="${service._id}" class="view-service-details-btn px-4 py-2 bg-blue-500 text-white rounded-button text-sm hover:bg-blue-600 transition-colors flex items-center justify-center">
+                        <i class="ri-eye-line mr-2"></i> View Details
+                    </button>
+                </div>
             </div>
         `;
         return serviceItemHtml;
@@ -832,7 +837,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('user-name').textContent = decoded.user.name;
             }
         }
+        // Get the current user's ID from the decoded token
+        let currentUserId = null;
+        if (token) {
+            const decoded = decodeToken(token);
+            if (decoded && decoded.user && decoded.user.id) {
+                currentUserId = decoded.user.id;
+            }
+        }
+        
+        // Initialize Socket.IO connection
+        const socket = io(BASE_URL);
 
+        socket.on('connect', () => {
+            console.log('Connected to WebSocket server from user dashboard');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from WebSocket server on user dashboard');
+        });
+
+        // Listen for real-time service updates
+        socket.on('serviceUpdate', (updatedService) => {
+            console.log('Real-time service update received:', updatedService);
+            // Check if the updated service belongs to the current user
+            if (currentUserId && updatedService.user && updatedService.user._id === currentUserId) {
+                showMessage(`Service for ${updatedService.vehicleId.make} ${updatedService.vehicleId.model} updated to: ${updatedService.type.replace(/-/g, ' ')}`, 'success');
+                fetchAndDisplayServiceHistory(); // Refresh service history for the user
+            }
+        });
         // Fetch and display vehicles and service history on page load
         fetchAndDisplayVehicles();
         fetchAndDisplayServiceHistory();
