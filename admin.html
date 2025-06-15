@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script src="https://cdn.tailwindcss.com/3.4.16"></script>
 <script>
 tailwind.config = {
@@ -977,7 +978,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 // document.getElementById('admin-name').textContent = decoded.user.name;
             }
         }
+        // Initialize Socket.IO connection
+        const socket = io(BASE_URL);
 
+        socket.on('connect', () => {
+            console.log('Connected to WebSocket server from admin dashboard');
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Disconnected from WebSocket server on admin dashboard');
+        });
+
+        // Listen for real-time service updates
+        socket.on('serviceUpdate', (updatedService) => {
+            console.log('Real-time service update received:', updatedService);
+            showMessage(`Service for ${updatedService.vehicleId.make} ${updatedService.vehicleId.model} updated! Status: ${updatedService.type.replace(/-/g, ' ')}`, 'success');
+            
+            // Refresh both lists for admin, as any update (new, status change) affects both views
+            fetchAndDisplayCurrentServices(); 
+            fetchAndDisplayRecentActivity(); 
+        });
         // Fetch and display services on page load for both sections
         fetchAndDisplayCurrentServices();
         fetchAndDisplayRecentActivity();
